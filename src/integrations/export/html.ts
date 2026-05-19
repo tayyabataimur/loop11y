@@ -39,9 +39,9 @@ function escapeHtml(input: string): string {
 }
 
 function scoreGaugeSvg(score: number, grade: string): string {
-  const radius = 84;
-  const stroke = 16;
-  const size = 220;
+  const radius = 70;
+  const stroke = 13;
+  const size = 180;
   const cx = size / 2;
   const circumference = 2 * Math.PI * radius;
   const pct = Math.max(0, Math.min(100, score)) / 100;
@@ -63,8 +63,8 @@ function scoreGaugeSvg(score: number, grade: string): string {
   <circle cx="${cx}" cy="${cx}" r="${radius}" fill="none" stroke="url(#gaugeGrad)" stroke-width="${stroke}"
     stroke-linecap="round" stroke-dasharray="${circumference}" stroke-dashoffset="${offset}"
     transform="rotate(-90 ${cx} ${cx})" filter="url(#gaugeGlow)" />
-  <text x="${cx}" y="${cx + 6}" text-anchor="middle" font-size="56" font-weight="800" fill="#ffffff" font-family="ui-sans-serif, system-ui, -apple-system, sans-serif" letter-spacing="-0.03em">${score}</text>
-  <text x="${cx}" y="${cx + 32}" text-anchor="middle" font-size="13" fill="rgba(255,255,255,0.7)" font-family="ui-sans-serif, system-ui, -apple-system, sans-serif" letter-spacing="0.12em">SCORE / 100</text>
+  <text x="${cx}" y="${cx + 6}" text-anchor="middle" font-size="44" font-weight="800" fill="#ffffff" font-family="ui-sans-serif, system-ui, -apple-system, sans-serif" letter-spacing="-0.03em">${score}</text>
+  <text x="${cx}" y="${cx + 28}" text-anchor="middle" font-size="11" fill="rgba(255,255,255,0.7)" font-family="ui-sans-serif, system-ui, -apple-system, sans-serif" letter-spacing="0.12em">SCORE / 100</text>
 </svg>`;
 }
 
@@ -173,24 +173,13 @@ function issueCard(issue: EvaluateResult["top_issues"][number]): string {
     <div class="issue-rank" style="background:${rankPalette(issue.rank)};">#${issue.rank}</div>
     <div class="issue-title">
       <h3>${escapeHtml(issue.headline)}</h3>
-      <div class="issue-meta">
-        ${badge(issue.impact.toUpperCase(), color)}
-        ${wcagBadges(issue.wcag_criterion)}
-        <span class="meta-pill">${issue.affected_elements} element${issue.affected_elements === 1 ? "" : "s"}</span>
-        ${issue.auto_fixable ? badge("Auto-fixable", "#16a34a") : ""}
-      </div>
+      ${badge(issue.impact.toUpperCase(), color)}
+      ${wcagBadges(issue.wcag_criterion)}
+      <span class="meta-pill">${issue.affected_elements} el</span>
+      ${issue.auto_fixable ? badge("Auto-fix", "#16a34a") : ""}
     </div>
     ${hint ? `<div class="issue-hint">${hint}</div>` : ""}
   </header>
-  <details class="issue-code">
-    <summary>Fix it <span class="link-arrow">→</span></summary>
-    <p class="issue-suggestion-compact">${escapeHtml(issue.suggestion)}</p>
-    <div class="code-grid">
-      <div><div class="code-label">Before</div><pre>${escapeHtml(issue.example_before)}</pre></div>
-      <div><div class="code-label">After</div><pre>${escapeHtml(issue.example_after)}</pre></div>
-    </div>
-    <a class="issue-link" href="${escapeHtml(issue.learn_more)}" target="_blank" rel="noopener">axe rule docs →</a>
-  </details>
 </article>`;
 }
 
@@ -244,9 +233,9 @@ body {
   line-height: 1.55;
   font-feature-settings: "ss01", "cv01", "cv11";
 }
-.container { max-width: 1120px; margin: 0 auto; padding: 28px 24px 80px; }
+.container { max-width: 1120px; margin: 0 auto; padding: 20px 24px 32px; }
 
-.topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
+.topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
 .brand { display:flex; align-items:center; gap: 10px; font-weight: 700; font-size: 16px; letter-spacing: -0.01em; color: var(--text); }
 .brand-mark {
   width: 28px; height: 28px; border-radius: 8px;
@@ -257,8 +246,8 @@ body {
 
 .hero {
   position: relative;
-  display: grid; grid-template-columns: 240px 1fr; gap: 36px; align-items: center;
-  padding: 36px 36px 32px;
+  display: grid; grid-template-columns: 200px 1fr; gap: 28px; align-items: center;
+  padding: 22px 28px;
   background: linear-gradient(135deg, var(--hero-from) 0%, var(--hero-via) 55%, var(--hero-to) 100%);
   color: #f8fafc;
   border-radius: 24px;
@@ -280,39 +269,41 @@ body {
   z-index: -1; opacity: 0.5;
 }
 .hero-eyebrow { font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: rgba(255,255,255,0.65); font-weight: 600; margin-bottom: 8px; }
-.hero-meta h1 { font-size: 28px; margin: 0 0 6px; letter-spacing: -0.02em; font-weight: 700; line-height: 1.15; }
+.hero-meta h1 { font-size: 22px; margin: 0 0 4px; letter-spacing: -0.02em; font-weight: 700; line-height: 1.15; }
 .hero-meta .url { color: rgba(255,255,255,0.7); font-size: 14px; word-break: break-all; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
-.hero-grade-row { display:flex; gap: 14px; align-items:center; margin-top: 18px; flex-wrap: wrap; }
+.hero-grade-row { display:flex; gap: 8px; align-items:center; margin-top: 10px; flex-wrap: wrap; }
 .grade-chip { font-weight: 700; padding: 6px 12px; border-radius: 999px; font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.16); color: #fff; }
 .grade-chip strong { color: #fff; }
-.hero-stats { display:grid; grid-template-columns: repeat(5, minmax(0,1fr)); gap: 10px; margin-top: 22px; }
-.stat { background: rgba(255,255,255,0.06); backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.08); padding: 12px 14px; border-radius: 14px; }
-.stat-num { display:block; font-size: 22px; font-weight: 700; color: #ffffff; line-height: 1.1; letter-spacing: -0.02em; }
-.stat-label { display:block; font-size: 11px; color: rgba(255,255,255,0.65); margin-top: 4px; letter-spacing: 0.06em; text-transform: uppercase; font-weight: 600; }
+.hero-stats { display:grid; grid-template-columns: repeat(5, minmax(0,1fr)); gap: 8px; margin-top: 14px; }
+.stat { background: rgba(255,255,255,0.06); backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.08); padding: 8px 10px; border-radius: 10px; }
+.stat-num { display:block; font-size: 18px; font-weight: 700; color: #ffffff; line-height: 1.1; letter-spacing: -0.02em; }
+.stat-label { display:block; font-size: 10px; color: rgba(255,255,255,0.65); margin-top: 2px; letter-spacing: 0.06em; text-transform: uppercase; font-weight: 600; }
 
-.section { margin-top: 36px; }
-.section h2 { font-size: 18px; margin: 0 0 6px; display:flex; align-items:center; gap: 10px; letter-spacing: -0.01em; font-weight: 700; }
+.section { margin-top: 18px; }
+.section h2 { font-size: 15px; margin: 0 0 4px; display:flex; align-items:center; gap: 8px; letter-spacing: -0.01em; font-weight: 700; }
 .section-count { background:#ede9fe; color: var(--accent); border-radius: 999px; padding: 2px 10px; font-size: 12px; font-weight: 700; }
-.section-intro { color: var(--muted); font-size: 14px; margin: 0 0 16px; }
+.section-intro { color: var(--muted); font-size: 12px; margin: 0 0 10px; }
 
 .card {
   background: var(--card);
   border: 1px solid var(--border);
-  border-radius: 16px;
-  padding: 22px;
+  border-radius: 12px;
+  padding: 12px 16px;
   box-shadow: 0 1px 2px rgba(11,16,32,0.04), 0 6px 24px -12px rgba(11,16,32,0.08);
 }
 .issue-card { transition: transform 0.15s ease, box-shadow 0.15s ease; }
-.issue-card + .issue-card { margin-top: 14px; }
-.issue-header { display:flex; gap: 14px; align-items:flex-start; }
+.issue-card + .issue-card { margin-top: 8px; }
+.issue-header { display:flex; gap: 12px; align-items:center; }
+.issue-title { display:flex; flex-wrap: wrap; align-items: center; gap: 8px; flex: 1 1 auto; min-width: 0; }
 .issue-rank {
-  width: 36px; height: 36px; border-radius: 10px;
+  width: 28px; height: 28px; border-radius: 8px;
   background: linear-gradient(135deg, #1f1147, #4f46e5);
   color:#fff; display:flex; align-items:center; justify-content:center;
-  font-weight:700; font-size: 13px; flex-shrink:0;
-  box-shadow: 0 6px 14px -6px rgba(79,70,229,0.6);
+  font-weight:700; font-size: 11px; flex-shrink:0;
+  box-shadow: 0 4px 10px -4px rgba(79,70,229,0.55);
 }
-.issue-title h3 { margin: 0 0 8px; font-size: 16.5px; letter-spacing: -0.01em; font-weight: 700; }
+.issue-title h3 { margin: 0; font-size: 14px; letter-spacing: -0.01em; font-weight: 700; }
+.issue-meta { display:flex; gap: 5px; flex-wrap: wrap; align-items:center; }
 .issue-meta { display:flex; gap: 6px; flex-wrap: wrap; align-items:center; }
 .badge { display:inline-flex; align-items:center; font-size: 11px; font-weight: 700; padding: 4px 9px; border-radius: 999px; border: 1px solid; letter-spacing: 0.02em; }
 .meta-pill { font-size: 11px; color: var(--muted); background:#f1f3fa; padding: 4px 9px; border-radius: 999px; font-weight: 600; border: 1px solid var(--border); }
@@ -346,7 +337,7 @@ pre {
 details[open] .link-arrow { transform: rotate(90deg); }
 .issue-code summary { list-style: none; }
 .issue-code summary::-webkit-details-marker { display: none; }
-.issue-code summary { display:inline-flex; align-items:center; padding: 6px 12px; border-radius: 999px; background:#ede9fe; color: var(--accent); }
+.issue-code summary { display:inline-flex; align-items:center; padding: 3px 9px; border-radius: 999px; background:#ede9fe; color: var(--accent); font-size: 11px; margin-top: 6px; }
 
 .incomplete-grid { display:grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; }
 .incomplete-card { background: linear-gradient(180deg, #fffbf2 0%, #ffffff 100%); border-color: #fde68a; }
@@ -370,7 +361,7 @@ details[open] .link-arrow { transform: rotate(90deg); }
 .quick-wins ul li { margin-bottom: 4px; }
 
 .footer {
-  margin-top: 56px; padding: 22px 24px; border-top: 1px solid var(--border);
+  margin-top: 18px; padding: 12px 16px; border-top: 1px solid var(--border);
   background: linear-gradient(180deg, transparent, rgba(124,58,237,0.04));
   border-radius: 16px;
   font-size: 12px; color: var(--muted);
@@ -433,7 +424,7 @@ function renderEvaluateHtml(result: EvaluateResult): string {
 <section class="section">
   <h2>Top issues to fix <span class="section-count">${reranked.length}</span></h2>
   <p class="section-intro">Visible-first: contrast, theme, font, and tap targets ranked before semantic-only failures.</p>
-  ${reranked.slice(0, 4).map(issueCard).join("")}
+  ${reranked.slice(0, 3).map(issueCard).join("")}
 </section>`
     : `
 <section class="section">
@@ -453,14 +444,9 @@ function renderEvaluateHtml(result: EvaluateResult): string {
     <div class="hero-grade-row">
       <span class="grade-chip">Grade <strong>${escapeHtml(result.grade)}</strong></span>
       <span class="grade-chip">WCAG <strong>${escapeHtml(result.wcag_level)}</strong></span>
+      <span class="grade-chip">${sev.violations} violations</span>
+      <span class="grade-chip">${sev.passed} passing</span>
       <span class="grade-chip">${sev.auto_fixable_count} auto-fixable</span>
-    </div>
-    <div class="hero-stats">
-      <div class="stat"><span class="stat-num">${sev.violations}</span><span class="stat-label">Violations</span></div>
-      <div class="stat"><span class="stat-num">${sev.critical}</span><span class="stat-label">Critical</span></div>
-      <div class="stat"><span class="stat-num">${sev.serious}</span><span class="stat-label">Serious</span></div>
-      <div class="stat"><span class="stat-num">${sev.passed}</span><span class="stat-label">Checks passed</span></div>
-      <div class="stat"><span class="stat-num">${sev.incomplete}</span><span class="stat-label">Needs review</span></div>
     </div>
     ${sevBar}
   </div>
