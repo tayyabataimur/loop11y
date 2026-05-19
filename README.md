@@ -2,242 +2,123 @@
 
 # Loop11y
 
-**Agentic accessibility auditing, remediation, and enforcement for any web product**
+Accessibility audits, remediation, and CI gates — CLI, MCP server, GitHub Action, HTTP API.
 
 [![npm](https://img.shields.io/npm/v/loop11y)](https://www.npmjs.com/package/loop11y)
-[![npm downloads](https://img.shields.io/npm/dm/loop11y)](https://www.npmjs.com/package/loop11y)
 [![CI](https://github.com/tayyabataimur/loop11y/actions/workflows/ci.yml/badge.svg)](https://github.com/tayyabataimur/loop11y/actions/workflows/ci.yml)
-[![License: MIT](https://img.shields.io/badge/License-MIT-purple.svg)](https://opensource.org/licenses/MIT)
-[![Node.js >= 18](https://img.shields.io/badge/node-%3E%3D18-brightgreen)](https://nodejs.org)
-[![MCP](https://img.shields.io/badge/MCP-compatible-blue)](https://modelcontextprotocol.io)
-[![TypeScript](https://img.shields.io/badge/TypeScript-strict-blue?logo=typescript)](https://www.typescriptlang.org)
-[![Powered by axe-core](https://img.shields.io/badge/powered%20by-axe--core-orange)](https://github.com/dequelabs/axe-core)
+[![License: MIT](https://img.shields.io/badge/License-MIT-purple.svg)](./LICENSE)
+[![Node >= 18](https://img.shields.io/badge/node-%3E%3D18-brightgreen)](https://nodejs.org)
 
-**🌐 [loop11y.tayyaba.dev](https://loop11y.tayyaba.dev)** — paste a URL, get an instant audit · [Use it](#use-it) · [Agent Skill](#2-agent-skill-skillssh) · [Tools](#tools) · [Capabilities](#capabilities)
+[**loop11y.tayyaba.dev**](https://loop11y.tayyaba.dev) — paste a URL, get an audit. No signup.
 
 </div>
 
 ---
 
-> **🌐 [loop11y.tayyaba.dev](https://loop11y.tayyaba.dev)** — public demo. Paste any URL, get a visible-first WCAG 2.2 report in ~10s. No signup, no email.
->
-> **Fastest install for AI coding agents:** one-line [Agent Skill](#2-agent-skill-skillssh) — guided prompting on top of the MCP server, works with Claude Code, Cursor, Cline, Codex, and [50+ other agents](https://skills.sh).
->
-> ```bash
-> npx skills add tayyabataimur/loop11y-skill -g -a claude-code
-> ```
-
-### 📊 One-command visual reports
-
 ```bash
 npx -y loop11y audit https://your-site.com --html --output report.html
-npx -y loop11y diff before.json after.json --output diff.html
 ```
-
-Self-contained HTML — score gauge, severity bar, top-issue cards with WCAG badges, auto-fixable callouts, "needs human review" section, and a side-by-side before/after diff. No JS runtime, share by email or commit to your repo.
 
 <a href="https://htmlpreview.github.io/?https://github.com/tayyabataimur/loop11y/blob/main/examples/sample-report.html">
-  <img src="docs/sample-report.jpg" alt="Loop11y accessibility report — score gauge, severity bar, ranked top issues with WCAG badges, quick wins callout, and a manual-review section" width="100%" />
+  <img src="docs/sample-report.jpg" alt="Loop11y HTML report: score gauge, severity bar, three ranked issue cards with WCAG badges" width="100%" />
 </a>
 
-<sub>↑ <strong>Sample audit report</strong> · <a href="https://htmlpreview.github.io/?https://github.com/tayyabataimur/loop11y/blob/main/examples/sample-report.html">open live</a> · <a href="https://htmlpreview.github.io/?https://github.com/tayyabataimur/loop11y/blob/main/examples/sample-diff-report.html">open before/after diff</a></sub>
+Single self-contained HTML — score gauge, severity bar, ranked issues, WCAG badges, manual-review section. Visible-first ranking puts contrast / target-size / font issues above semantic-only failures. Same engine powers [the web demo](https://loop11y.tayyaba.dev), the MCP server, and the GitHub Action.
 
-<a href="https://htmlpreview.github.io/?https://github.com/tayyabataimur/loop11y/blob/main/examples/sample-diff-report.html">
-  <img src="docs/sample-diff-report.jpg" alt="Loop11y before/after diff report — score delta, resolved issues, newly introduced issues, and still-present issues" width="100%" />
-</a>
+Also: `loop11y diff before.json after.json --output diff.html` → [side-by-side delta](https://htmlpreview.github.io/?https://github.com/tayyabataimur/loop11y/blob/main/examples/sample-diff-report.html).
 
-<sub>↑ <strong>Before / after diff</strong> — `loop11y diff before.json after.json --output diff.html`</sub>
+## Install
 
-**Loop11y** is a universal accessibility layer for humans and AI agents.
+| Surface | Command |
+|---|---|
+| CLI | `npm i -g loop11y` or `npx -y loop11y` |
+| Agent Skill (Claude Code, Cursor, Cline, Codex, [50+ others](https://skills.sh)) | `npx skills add tayyabataimur/loop11y-skill -g -a claude-code` |
+| MCP server (stdio) | add to client config (see below) |
+| MCP server (HTTP) | `LOOP11Y_PORT=3000 npx -y loop11y` |
+| GitHub Action | `uses: tayyabataimur/loop11y/action@v0.1.0` |
+| Harness SDK | `import { Loop11yClient } from "loop11y/harness-sdk"` |
+| Docker | `docker build -t loop11y . && docker run -p 3000:3000 -e LOOP11Y_PORT=3000 loop11y` |
 
-It helps teams **evaluate**, **explain**, **prioritize**, **remediate**, and eventually **enforce** accessibility across websites and web apps with the lowest possible setup friction.
+## CLI
 
-Most accessibility tools stop at detection. Loop11y is being built to close the loop:
-
-- audit a live experience
-- explain what failed in plain language
-- identify quick wins
-- generate patch previews
-- apply safe fixes
-- rerun and verify improvements
-
-## Vision
-
-Make accessibility improvement as easy as running a URL through an agent.
-
-Loop11y is not meant to be only for React or Next.js teams. The goal is to become the easiest accessibility workflow for:
-
-- developers
-- designers
-- QA teams
-- founders and PMs
-- agencies
-- accessibility specialists
-- AI assistants using MCP
-
-across:
-
-- static sites
-- SPAs
-- design systems
-- e-commerce products
-- dashboards
-- docs sites
-- React / Next.js / Vue / Svelte / Angular / plain HTML
-
-## Who it's for
-
-### Developers
-Get actionable violations, code examples, patch previews, and safe autofixes.
-
-### Designers
-Understand user impact, hierarchy issues, naming issues, contrast problems, and interaction gaps.
-
-### QA and accessibility reviewers
-Run repeatable audits, compare results, and produce shareable reports.
-
-### AI agents and MCP clients
-Use Loop11y as an accessibility copilot inside Claude, Cursor, Copilot, Cline, and other MCP-compatible tools.
-
-## Use it
-
-Loop11y meets you where you build. Pick a path:
-
-| You are... | Surface | Setup time |
-|---|---|---|
-| Coding with Claude / Cursor / Cline / Copilot | [MCP server](#1-mcp-server-claude-cursor-cline-copilot) | 30s |
-| Using an agent that supports skills.sh | [Agent Skill](#2-agent-skill-skillssh) | 30s |
-| In the terminal | [CLI](#3-cli) | 10s |
-| Building a custom agent or GPT | [HTTP API + OpenAPI](#4-http-api--openapi--chatgpt-gpt-action) | 1 min |
-| Gating PRs in CI | [GitHub Action](#5-github-action) | 2 min |
-| Embedding in your own code | [Harness SDK](#6-harness-sdk-programmatic) | 1 min |
-| Self-hosting | [Docker / Fly](#7-self-host-docker--fly) | 5 min |
-
-> [!NOTE]
-> All paths share the same toolset (`evaluate`, `remediate`, `audit_component`, `audit_repo`, `crawl_site`, `fix_component`). Choose by surface, not capability.
-
-### 1. MCP server (Claude, Cursor, Cline, Copilot)
-
-Add to your MCP client config:
-
-```json
-{
-  "mcpServers": {
-    "loop11y": {
-      "command": "npx",
-      "args": ["-y", "loop11y"]
-    }
-  }
-}
+```bash
+loop11y audit <url>                    [--json|--markdown|--sarif|--html] [--output <file>]
+loop11y audit:file <path>              [--json|--markdown|--sarif|--html] [--output <file>]
+loop11y audit:repo <path>              [--max-files <n>] [--base-url <url>]
+loop11y crawl --url <url>              [--max-pages <n>] [--include-pattern <re>] [--exclude-pattern <re>]
+loop11y crawl --sitemap <url>          [--max-pages <n>]
+loop11y crawl --routes <file>          [--max-pages <n>]
+loop11y verify <source-path> --url <url>
+loop11y diff <before.json> <after.json> --output report.html
 ```
 
-Restart the client. Ask: *"Evaluate https://example.com for accessibility issues."*
+Threshold gates: `--fail-on critical|serious|moderate|minor`, `--max-violations <n>`, `--baseline <report.json>`.
 
-Config paths:
-- **Claude Desktop**: `~/Library/Application Support/Claude/claude_desktop_config.json`
-- **Claude Code**: `~/.claude/settings.json` → `mcpServers`
-- **Cursor**: Settings → MCP
-- **Cline**: VS Code settings → `cline.mcpServers`
+Auth for protected pages:
 
-### 2. Agent Skill (skills.sh)
-
-Adds guided prompting on top of the MCP server so the agent picks the right tool, asks for source paths before patching, handles auth, and re-verifies after fixes. Works with Claude Code, Cursor, Cline, Codex, OpenCode, Goose, and [50+ other agents](https://skills.sh).
-
-```sh
-# install MCP server (path 1 above), then:
-npx skills add tayyabataimur/loop11y-skill -g -a claude-code
-```
-
-Use `--all` to install across every supported agent. Source + docs: [tayyabataimur/loop11y-skill](https://github.com/tayyabataimur/loop11y-skill).
-
-### 3. CLI
-
-```sh
-npm i -g loop11y
-# or run on demand:
-npx -y loop11y <command>
-```
-
-Common commands:
-
-```sh
-loop11y audit https://example.com --markdown
-loop11y audit:file ./index.html --output ./report.md
-loop11y audit:repo . --max-files 10 --output ./repo-report.json
-loop11y crawl --url https://example.com --max-pages 10 --markdown
-loop11y verify ./src/App.tsx --url http://localhost:3000 --markdown
-
-# auth for protected dev environments
+```bash
 loop11y audit http://localhost:3000/dashboard \
   --storage-state ./playwright/.auth/user.json \
   --header 'x-env: staging'
 ```
 
-### 4. HTTP API + OpenAPI + ChatGPT GPT Action
+Crawl auto-detects `/sitemap.xml`, `/sitemap_index.xml`, and `robots.txt` `Sitemap:` directives. Tracking params (`utm_*`, `gclid`, `fbclid`, …) are stripped before dedupe. Discovery is post-hydration via Playwright, so SPA routes (Next.js, Remix, etc.) are found.
 
-Run as HTTP server:
+## MCP
 
-```sh
-LOOP11Y_PORT=3000 npx loop11y
+stdio (Claude Desktop / Claude Code / Cursor / Cline):
+
+```json
+{
+  "mcpServers": {
+    "loop11y": { "command": "npx", "args": ["-y", "loop11y"] }
+  }
+}
 ```
 
-Endpoints:
-- `POST /api/evaluate` — JSON API for any agent / workflow tool
-- `GET  /openapi.json` — OpenAPI 3 spec (drop into ChatGPT GPT Action, n8n, Zapier, custom agent)
-- `GET  /.well-known/ai-plugin.json` — plugin manifest
-- `POST /mcp` — streamable HTTP MCP transport
-- `GET  /health` — liveness check
+Streamable HTTP transport: `POST /mcp` once `LOOP11Y_PORT=3000 npx -y loop11y` is running.
 
-Example:
-```sh
-curl -X POST localhost:3000/api/evaluate \
-  -H 'content-type: application/json' \
-  -d '{"url":"https://example.com"}'
+Tools exposed: `evaluate`, `audit_component`, `audit_repo`, `crawl_site`, `remediate`, `fix_component`. (`verify` is CLI / HTTP only.)
+
+## HTTP API
+
+```bash
+LOOP11Y_PORT=3000 npx -y loop11y
 ```
 
-### 5. GitHub Action
+| Endpoint | Purpose |
+|---|---|
+| `POST /api/evaluate` | audit a single URL |
+| `POST /api/crawl` | crawl + audit a site |
+| `POST /api/repo-audit` | scan a checked-out repo |
+| `POST /api/remediate` | report / diff / fix a source file |
+| `POST /api/verify` | re-audit after a remediation |
+| `POST /mcp` | streamable HTTP MCP transport |
+| `GET /openapi.json` | OpenAPI 3 spec (ChatGPT GPT Action, n8n, Zapier) |
+| `GET /.well-known/ai-plugin.json` | plugin manifest |
+| `GET /health` | liveness |
 
-Gate PRs on accessibility regressions.
+## GitHub Action
 
 ```yaml
-# .github/workflows/a11y.yml
 - uses: tayyabataimur/loop11y/action@v0.1.0
   with:
     url: https://staging.example.com
-    fail-on: serious
-    max-violations: 10
+    fail-under: 90
 ```
 
-PR comment + check status auto-generated. See [action/README.md](./action/README.md).
+Posts a Markdown report as a PR comment, sets check status. See [`action/README.md`](./action/README.md).
 
-### 6. Harness SDK (programmatic)
+## Output formats
 
-For agents and apps that talk to a running HTTP instance:
+| Flag | Use |
+|---|---|
+| `--json` (default) | machine-readable, baseline diff input |
+| `--markdown` | PR comments, Slack |
+| `--html` | self-contained visual report, shareable |
+| `--sarif` | GitHub Code Scanning, Sonar |
 
-```ts
-import { Loop11yClient } from "loop11y/harness-sdk";
-
-const client = new Loop11yClient({ baseUrl: "http://localhost:3000" });
-const report = await client.evaluate({ url: "https://example.com" });
-console.log(report.score, report.ai_summary);
-```
-
-### 7. Self-host (Docker / Fly)
-
-Docker:
-```sh
-docker build -t loop11y .
-docker run -p 3000:3000 -e LOOP11Y_PORT=3000 loop11y
-```
-
-Fly:
-```sh
-fly launch --config deploy/fly.toml
-fly deploy
-```
-
-> [!NOTE]
-> Hosted mode audits public URLs. For localhost or private dev environments, use local stdio MCP (path 1) or local CLI (path 3).
+Determinism: viewport pinned to 1280×800, `reducedMotion: reduce`, axe-core version emitted on every report.
 
 ## Local development
 
@@ -247,125 +128,27 @@ cd loop11y
 npm install
 npx playwright install chromium
 npm run build
-node dist/index.js
+node dist/index.js              # stdio MCP
+LOOP11Y_PORT=3000 node dist/index.js   # HTTP + MCP-over-HTTP
+node dist/index.js audit https://example.com --html --output /tmp/r.html
 ```
 
-## Capabilities
+Sample report regen: `npm run sample:screenshots`.
 
-Loop11y supports the core agentic loop:
+## Stack
 
-1. **Evaluate** a live URL
-2. **Rank** issues by severity and impact
-3. **Explain** failures in plain English
-4. **Preview** a remediation diff
-5. **Apply** safe fixes to source files
+axe-core 4.10 · Playwright (Chromium) · TypeScript · Zod · MCP TypeScript SDK · ts-morph (source-aware fixes).
 
-## Tools
+Vercel cannot run Playwright + Chromium under serverless function limits, so the audit engine is intended for Fly / Docker / local. Vercel hosts the web frontend (`web/`); it proxies `/api/audit` to the Fly backend via `A11Y_API_URL`.
 
-### `evaluate`
-Audits a live URL and returns:
-- accessibility score
-- grade
-- estimated WCAG level
-- ranked issues
-- quick wins
-- plain-language AI summary
+## Docs
 
-### `remediate`
-Runs audit + remediation in three modes:
-- `report`
-- `diff`
-- `fix`
-
-### `audit_component`
-Returns raw axe-core violations for a single page or HTML file.
-
-### `fix_component`
-Applies a single known fix strategy to a source file.
-
-### `audit_repo`
-Scans a project and returns a prioritized accessibility summary.
-
-## Current scope vs future scope
-
-### Current scope
-The implementation is strongest today for:
-- rendered URL auditing
-- local development workflows
-- TSX / JSX / HTML source remediation
-- React and Next.js-oriented patch workflows
-
-### Future scope
-The product direction is broader:
-- any web stack
-- any user role
-- any integration surface
-- any stage of the delivery lifecycle
-
-That means evolving from a patcher into a universal accessibility platform with:
-- evaluation
-- remediation
-- workflow automation
-- continuous enforcement
-
-## Example workflow
-
-```text
-evaluate("https://example.com")
-  -> score, grade, ranked issues, quick wins
-
-remediate(source, url, mode="diff")
-  -> preview before/after patch
-
-remediate(source, url, mode="fix")
-  -> write safe fixes to disk
-```
-
-## Design principles
-
-### 1. Detection is not enough
-Reports should lead to remediation.
-
-### 2. Low friction wins
-Loop11y should work with `npx`, MCP, CI, and simple local workflows.
-
-### 3. Explain for different audiences
-The same issue should be understandable by a developer, designer, PM, or founder.
-
-### 4. Safe automation over risky automation
-Autofix only what can be fixed confidently. Escalate the rest with clear guidance.
-
-### 5. Human + AI collaboration
-Agents should assist, not hide tradeoffs. Diffs, confidence, and manual follow-up matter.
-
-See also:
-- [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md)
-- [docs/ROADMAP.md](./docs/ROADMAP.md)
-
-## Tech stack
-
-- **[Model Context Protocol TypeScript SDK](https://github.com/modelcontextprotocol/typescript-sdk)** — MCP server and tool registration
-- **[axe-core](https://github.com/dequelabs/axe-core)** — accessibility rule engine
-- **[Playwright](https://playwright.dev)** — rendering and browser automation
-- **[ts-morph](https://ts-morph.com)** — AST-based source transforms
-- **[Zod](https://zod.dev)** — runtime schema validation
-
-## Contributing
-
-Issues and PRs are welcome.
-
-High-impact contribution areas:
-- new stack-aware fixers
-- better issue-to-source mapping
-- crawl and report tooling
-- safer autofix strategies
-- role-specific reporting
-- CI and GitHub integrations
+- [`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md) — request flow, source mapping
+- [`docs/THREAT-MODEL.md`](./docs/THREAT-MODEL.md) — what loop11y does and does not protect against
+- [`docs/INTEGRATIONS.md`](./docs/INTEGRATIONS.md) — agent / IDE / CI matrix
+- [`CHANGELOG.md`](./CHANGELOG.md)
+- [`SECURITY.md`](./SECURITY.md)
 
 ## Author
 
-Built by [Tayyaba Taimur](https://tayyaba.dev).
-
-## Licence
-
-[MIT](./LICENSE)
+[Tayyaba Taimur](https://tayyaba.dev) · MIT licensed.
