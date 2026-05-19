@@ -13,12 +13,14 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-strict-blue?logo=typescript)](https://www.typescriptlang.org)
 [![Powered by axe-core](https://img.shields.io/badge/powered%20by-axe--core-orange)](https://github.com/dequelabs/axe-core)
 
-[Use it](#use-it) · [Agent Skill](#2-agent-skill-skillssh) · [Who it's for](#who-its-for) · [Tools](#tools) · [Capabilities](#capabilities)
+**🌐 [loop11y.tayyaba.dev](https://loop11y.tayyaba.dev)** — paste a URL, get an instant audit · [Use it](#use-it) · [Agent Skill](#2-agent-skill-skillssh) · [Tools](#tools) · [Capabilities](#capabilities)
 
 </div>
 
 ---
 
+> **🌐 [loop11y.tayyaba.dev](https://loop11y.tayyaba.dev)** — public demo. Paste any URL, get a visible-first WCAG 2.2 report in ~10s. No signup, no email.
+>
 > **Fastest install for AI coding agents:** one-line [Agent Skill](#2-agent-skill-skillssh) — guided prompting on top of the MCP server, works with Claude Code, Cursor, Cline, Codex, and [50+ other agents](https://skills.sh).
 >
 > ```bash
