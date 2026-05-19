@@ -2,7 +2,7 @@
 
 # Loop11y
 
-Accessibility audits, remediation, and CI gates — CLI, MCP server, GitHub Action, HTTP API.
+Accessibility, in a loop — **audit · insight · fix · verify**. Hand the report to your AI agent and ship the PR. CLI, MCP server, GitHub Action, HTTP API.
 
 [![npm](https://img.shields.io/npm/v/loop11y)](https://www.npmjs.com/package/loop11y)
 [![CI](https://github.com/tayyabataimur/loop11y/actions/workflows/ci.yml/badge.svg)](https://github.com/tayyabataimur/loop11y/actions/workflows/ci.yml)
@@ -23,7 +23,7 @@ npx -y loop11y audit https://your-site.com --html --output report.html
   <img src="docs/sample-report.jpg" alt="Loop11y HTML report: score gauge, severity bar, three ranked issue cards with WCAG badges" width="100%" />
 </a>
 
-Single self-contained HTML — score gauge, severity bar, ranked issues, WCAG badges, manual-review section. Visible-first ranking puts contrast / target-size / font issues above semantic-only failures. Same engine powers [the web demo](https://loop11y.tayyaba.dev), the MCP server, and the GitHub Action.
+Single self-contained HTML — score gauge, severity bar, ranked issues with plain-English user-impact, WCAG badges, manual-review section. Visible-first ranking puts contrast / target-size / font issues above semantic-only failures. **Each issue is patch-ready for your AI agent** — Claude Code / Cursor / Cline / Copilot / Aider / Codex all speak Loop11y via MCP. Same engine powers [the web demo](https://loop11y.tayyaba.dev), the MCP server, and the GitHub Action.
 
 Also: `loop11y diff before.json after.json --output diff.html` → [side-by-side delta](https://htmlpreview.github.io/?https://github.com/tayyabataimur/loop11y/blob/main/examples/sample-diff-report.html).
 
