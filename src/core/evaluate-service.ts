@@ -246,6 +246,8 @@ export async function evaluateUrl(options: EvaluateOptions & { axe?: AxeRunOptio
     incomplete_checks: audit.incomplete_checks,
     ...(audit.contentType ? { content_type: audit.contentType } : {}),
     ...(audit.discoveredLinks ? { discovered_links: audit.discoveredLinks } : {}),
+    ...(audit.axeVersion ? { axe_version: audit.axeVersion } : {}),
+    ...(audit.viewport ? { viewport: audit.viewport } : {}),
   };
 
   return { ...partial, ai_summary: buildAiSummary(partial) };

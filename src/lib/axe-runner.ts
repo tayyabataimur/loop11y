@@ -34,8 +34,12 @@ export interface AuditResult {
   incomplete_checks: IncompleteCheck[];
   contentType?: string;
   discoveredLinks?: string[];
+  axeVersion?: string;
+  viewport?: { width: number; height: number };
   timestamp: string;
 }
+
+const DEFAULT_VIEWPORT = { width: 1280, height: 800 };
 
 export interface AxeRunOptions {
   collectLinks?: boolean;
@@ -71,6 +75,8 @@ export async function runAxeAudit(target: string, auth?: AuthConfig, options?: A
   try {
     browser = await chromium.launch({ headless: true });
     context = await browser.newContext({
+      viewport: DEFAULT_VIEWPORT,
+      reducedMotion: "reduce",
       ...(auth?.storageState ? { storageState: auth.storageState } : {}),
       ...(auth?.headers ? { extraHTTPHeaders: auth.headers } : {}),
       ...(auth?.basicAuth ? { httpCredentials: auth.basicAuth } : {}),
@@ -93,11 +99,15 @@ export async function runAxeAudit(target: string, auth?: AuthConfig, options?: A
     const axeSource = readFileSync(axePath, "utf-8");
     await page.addScriptTag({ content: axeSource });
 
-    const results = await page.evaluate(async () => {
+    const evalResult = await page.evaluate(async () => {
       // axe is available globally after the script tag injection
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      return await (globalThis as any).axe.run();
-    }) as AxeResults;
+      const axe = (globalThis as any).axe;
+      const results = await axe.run();
+      return { results, version: axe.version as string };
+    }) as { results: AxeResults; version: string };
+    const results = evalResult.results;
+    const axeVersion = evalResult.version;
 
     const violations: Violation[] = results.violations.map((v: Result) => ({
       id: v.id,
@@ -136,6 +146,8 @@ export async function runAxeAudit(target: string, auth?: AuthConfig, options?: A
       incomplete_checks,
       ...(contentType ? { contentType } : {}),
       ...(discoveredLinks ? { discoveredLinks } : {}),
+      axeVersion,
+      viewport: DEFAULT_VIEWPORT,
       timestamp: new Date().toISOString(),
     };
   } finally {

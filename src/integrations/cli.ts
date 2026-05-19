@@ -6,11 +6,12 @@ import { verifyRemediation } from "../core/verify-service.js";
 import type { AuthConfig } from "../core/auth.js";
 import { toMarkdownReport } from "./export/markdown.js";
 import { toJsonReport, type ReportFormat, writeReport } from "./export/json.js";
+import { toSarifReport } from "./export/sarif.js";
 import { auditRepo } from "../tools/scan.js";
 import { crawlSite } from "../tools/crawl.js";
 
 function printHelp(): void {
-  process.stdout.write(`Loop11y CLI\n\nUsage:\n  loop11y audit <url> [--json|--markdown] [--output <file>] [auth flags]\n  loop11y audit:file <path> [--json|--markdown] [--output <file>] [auth flags]\n  loop11y audit:repo <path> [--base-url <url>] [--max-files <n>] [--json|--markdown] [--output <file>] [auth flags]\n  loop11y crawl --url <url> [--max-pages <n>] [--json|--markdown] [--output <file>] [auth flags]\n  loop11y crawl --sitemap <url> [--max-pages <n>] [--json|--markdown] [--output <file>] [auth flags]\n  loop11y crawl --routes <file> [--max-pages <n>] [--json|--markdown] [--output <file>] [auth flags]\n  loop11y verify <source-path> --url <url> [--json|--markdown] [--output <file>] [auth flags]\n  loop11y --help\n\nAuth flags:\n  --storage-state <file>\n  --basic-auth-user <user> --basic-auth-pass <pass>\n  --header "Name: Value"   (repeatable)\n\nThreshold flags:\n  --fail-on <critical|serious|moderate|minor>\n  --max-violations <n>\n  --baseline <report.json>\n\nNotes:\n  - No arguments starts MCP server mode\n  - Crawl currently supports same-origin discovery and sitemap seeding\n`);
+  process.stdout.write(`Loop11y CLI\n\nUsage:\n  loop11y audit <url> [--json|--markdown|--sarif] [--output <file>] [auth flags]\n  loop11y audit:file <path> [--json|--markdown|--sarif] [--output <file>] [auth flags]\n  loop11y audit:repo <path> [--base-url <url>] [--max-files <n>] [--json|--markdown|--sarif] [--output <file>] [auth flags]\n  loop11y crawl --url <url> [crawl flags]\n  loop11y crawl --sitemap <url> [crawl flags]\n  loop11y crawl --routes <file> [crawl flags]\n  loop11y verify <source-path> --url <url> [--json|--markdown|--sarif] [--output <file>] [auth flags]\n  loop11y --help\n\nCrawl flags:\n  --max-pages <n>\n  --include-pattern <regex>   (repeatable)\n  --exclude-pattern <regex>   (repeatable)\n  --no-auto-sitemap           (disable sitemap.xml / robots.txt auto-detect)\n  --json | --markdown | --sarif\n  --output <file>\n\nAuth flags:\n  --storage-state <file>\n  --basic-auth-user <user> --basic-auth-pass <pass>\n  --header "Name: Value"   (repeatable)\n\nThreshold flags:\n  --fail-on <critical|serious|moderate|minor>\n  --max-violations <n>\n  --baseline <report.json>\n\nOutput formats:\n  --json     JSON (default)\n  --markdown Markdown\n  --sarif    SARIF 2.1.0 (GitHub Code Scanning)\n\nNotes:\n  - No arguments starts MCP server mode\n  - Crawl auto-detects /sitemap.xml, /sitemap_index.xml, and robots.txt Sitemap directive\n`);
 }
 
 function readFlagValue(args: string[], name: string): string | undefined {
@@ -48,14 +49,19 @@ function normalizeExistingPath(pathValue: string): string {
 
 function detectFormat(args: string[], outputPath?: string): ReportFormat {
   if (hasFlag(args, "--markdown")) return "markdown";
+  if (hasFlag(args, "--sarif")) return "sarif";
   if (hasFlag(args, "--json")) return "json";
   if (outputPath?.toLowerCase().endsWith(".md")) return "markdown";
+  if (outputPath?.toLowerCase().endsWith(".sarif") || outputPath?.toLowerCase().endsWith(".sarif.json")) return "sarif";
   return "json";
 }
 
 function renderForStdout(result: unknown, format: ReportFormat, structured: boolean, summary?: string): string {
   if (format === "markdown") {
     return toMarkdownReport(result);
+  }
+  if (format === "sarif") {
+    return toSarifReport(result);
   }
   if (!structured && summary) {
     return `${summary}\n`;
@@ -71,7 +77,8 @@ function emitResult(result: unknown, format: ReportFormat, structured: boolean, 
   process.stdout.write(renderForStdout(result, format, structured, summary));
 
   if (outputPath) {
-    process.stdout.write(`\n${format === "markdown" ? "Markdown" : "JSON"} report written to ${outputPath}\n`);
+    const label = format === "markdown" ? "Markdown" : format === "sarif" ? "SARIF" : "JSON";
+    process.stdout.write(`\n${label} report written to ${outputPath}\n`);
   }
 }
 
@@ -207,7 +214,7 @@ export async function runCli(rawArgs: string[]): Promise<void> {
 
   const outputPath = readFlagValue(args, "--output");
   const format = detectFormat(args, outputPath);
-  const structured = hasFlag(args, "--json") || hasFlag(args, "--markdown");
+  const structured = hasFlag(args, "--json") || hasFlag(args, "--markdown") || hasFlag(args, "--sarif");
   const auth = parseAuth(args);
   const failOn = readFlagValue(args, "--fail-on");
   const maxViolations = parseIntegerFlag(readFlagValue(args, "--max-violations"), "--max-violations");
@@ -269,10 +276,16 @@ export async function runCli(rawArgs: string[]): Promise<void> {
       if (!url && !sitemap && !(routes && routes.length > 0)) {
         throw new Error("Usage: loop11y crawl --url <url> | --sitemap <url> | --routes <file> [--max-pages <n>] [--json|--markdown] [--output <file>]");
       }
+      const includePatterns = readFlagValues(args, "--include-pattern");
+      const excludePatterns = readFlagValues(args, "--exclude-pattern");
+      const noAutoSitemap = hasFlag(args, "--no-auto-sitemap");
       const result = await crawlSite({
         ...(url ? { url } : {}),
         ...(sitemap ? { sitemap } : {}),
         ...(routes ? { routes } : {}),
+        ...(includePatterns.length > 0 ? { includePatterns } : {}),
+        ...(excludePatterns.length > 0 ? { excludePatterns } : {}),
+        ...(noAutoSitemap ? { autoSitemap: false } : {}),
         maxPages,
         ...(auth ? { auth } : {}),
       });

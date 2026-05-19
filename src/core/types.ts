@@ -44,6 +44,8 @@ export interface EvaluateResult {
   incomplete_checks: IncompleteCheck[];
   content_type?: string;
   discovered_links?: string[];
+  axe_version?: string;
+  viewport?: { width: number; height: number };
   passing_checks?: string[];
   ai_summary: string;
 }

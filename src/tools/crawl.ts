@@ -6,11 +6,15 @@ export const crawlSiteSchema = z.object({
   url: z.string().optional().describe("Starting URL to crawl. Use for same-origin link discovery."),
   sitemap: z.string().optional().describe("Optional sitemap.xml URL to seed the crawl queue."),
   routes: z.array(z.string()).optional().describe("Explicit list of route paths/URLs to seed the crawl queue."),
+  includePatterns: z.array(z.string()).optional().describe("Regex patterns; only URLs matching at least one are enqueued."),
+  excludePatterns: z.array(z.string()).optional().describe("Regex patterns; URLs matching any are skipped."),
+  autoSitemap: z.boolean().optional().default(true).describe("When url provided, try /sitemap.xml, /sitemap_index.xml and robots.txt Sitemap directive before falling back to link discovery."),
   maxPages: z.number().int().min(1).max(200).default(20).describe("Maximum pages to audit."),
   auth: authConfigSchema.optional(),
 });
 
-export type CrawlSiteInput = z.infer<typeof crawlSiteSchema>;
+export type CrawlSiteInput = z.input<typeof crawlSiteSchema>;
+type CrawlSiteParsed = z.infer<typeof crawlSiteSchema>;
 
 export interface CrawlPageResult {
   url: string;
@@ -38,6 +42,7 @@ export interface CrawlAggregateViolation {
 export interface CrawlSiteResult {
   startUrl?: string;
   sitemap?: string;
+  discoveredSitemap?: string;
   origin: string;
   pagesDiscovered: number;
   pagesEnqueued: number;
@@ -51,6 +56,14 @@ export interface CrawlSiteResult {
   pageResults: CrawlPageResult[];
   timestamp: string;
 }
+
+const TRACKING_PARAMS = new Set([
+  "utm_source", "utm_medium", "utm_campaign", "utm_term", "utm_content", "utm_id",
+  "gclid", "fbclid", "msclkid", "yclid", "dclid",
+  "mc_cid", "mc_eid", "_hsenc", "_hsmi", "hsCtaTracking",
+  "ref", "ref_src", "ref_url", "referrer", "source",
+  "igshid", "vero_conv", "vero_id",
+]);
 
 const NON_HTML_EXTENSIONS = new Set([
   ".css", ".js", ".mjs", ".cjs", ".json", ".webmanifest", ".map",
@@ -95,16 +108,40 @@ function ensureHttpUrl(value: string): URL {
   return url;
 }
 
+function stripTrackingParams(url: URL): void {
+  const keep: Array<[string, string]> = [];
+  for (const [k, v] of url.searchParams.entries()) {
+    if (TRACKING_PARAMS.has(k.toLowerCase())) continue;
+    keep.push([k, v]);
+  }
+  // Rebuild deterministically sorted to dedupe query-order variants
+  keep.sort((a, b) => (a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0));
+  url.search = "";
+  for (const [k, v] of keep) url.searchParams.append(k, v);
+}
+
 function normalizeUrlForCrawl(raw: string, origin: string): string | null {
   try {
     const url = new URL(raw, origin);
     if (!["http:", "https:"].includes(url.protocol)) return null;
     if (url.origin !== origin) return null;
     url.hash = "";
+    stripTrackingParams(url);
     return url.toString().replace(/\/$/, "") || url.origin;
   } catch {
     return null;
   }
+}
+
+function compilePatterns(patterns: string[] | undefined): RegExp[] {
+  if (!patterns) return [];
+  return patterns.map((p) => new RegExp(p));
+}
+
+function passesPatterns(url: string, include: RegExp[], exclude: RegExp[]): boolean {
+  if (exclude.some((r) => r.test(url))) return false;
+  if (include.length > 0 && !include.some((r) => r.test(url))) return false;
+  return true;
 }
 
 function extractUrlsFromSitemap(xml: string, origin: string): string[] {
@@ -152,12 +189,64 @@ async function checkContentTypeIsHtml(url: string, auth?: AuthConfig): Promise<{
   }
 }
 
-async function seedQueue(input: CrawlSiteInput, origin: string): Promise<string[]> {
+async function tryFetchText(url: string, auth?: AuthConfig): Promise<string | null> {
+  try {
+    return await fetchText(url, auth);
+  } catch {
+    return null;
+  }
+}
+
+async function discoverSitemapUrls(origin: string, auth?: AuthConfig): Promise<string[]> {
   const urls = new Set<string>();
+  const candidates = [`${origin}/sitemap.xml`, `${origin}/sitemap_index.xml`];
+
+  const robots = await tryFetchText(`${origin}/robots.txt`, auth);
+  if (robots) {
+    for (const match of robots.matchAll(/^\s*Sitemap:\s*(\S+)/gim)) {
+      candidates.push(match[1].trim());
+    }
+  }
+
+  const seen = new Set<string>();
+  for (const candidate of candidates) {
+    if (seen.has(candidate)) continue;
+    seen.add(candidate);
+    const xml = await tryFetchText(candidate, auth);
+    if (!xml) continue;
+    // sitemap index: recurse one level
+    if (/<sitemapindex/i.test(xml)) {
+      for (const match of xml.matchAll(/<loc>([^<]+)<\/loc>/gi)) {
+        const child = match[1].trim();
+        if (seen.has(child)) continue;
+        seen.add(child);
+        const childXml = await tryFetchText(child, auth);
+        if (childXml) {
+          for (const u of extractUrlsFromSitemap(childXml, origin)) urls.add(u);
+        }
+      }
+    } else {
+      for (const u of extractUrlsFromSitemap(xml, origin)) urls.add(u);
+    }
+  }
+
+  return [...urls];
+}
+
+async function seedQueue(input: CrawlSiteParsed, origin: string): Promise<{ urls: string[]; sitemapFound?: string }> {
+  const urls = new Set<string>();
+  let sitemapFound: string | undefined;
 
   if (input.sitemap) {
     const xml = await fetchText(input.sitemap, input.auth);
     for (const url of extractUrlsFromSitemap(xml, origin)) urls.add(url);
+    sitemapFound = input.sitemap;
+  } else if (input.url && input.autoSitemap !== false) {
+    const discovered = await discoverSitemapUrls(origin, input.auth);
+    if (discovered.length > 0) {
+      for (const u of discovered) urls.add(u);
+      sitemapFound = `${origin}/sitemap.xml`;
+    }
   }
 
   if (input.url) {
@@ -172,17 +261,21 @@ async function seedQueue(input: CrawlSiteInput, origin: string): Promise<string[
     }
   }
 
-  return [...urls];
+  return { urls: [...urls], ...(sitemapFound ? { sitemapFound } : {}) };
 }
 
-export async function crawlSite(input: CrawlSiteInput): Promise<CrawlSiteResult> {
+export async function crawlSite(rawInput: CrawlSiteInput): Promise<CrawlSiteResult> {
+  const input: CrawlSiteParsed = crawlSiteSchema.parse(rawInput);
   if (!input.url && !input.sitemap && !(input.routes && input.routes.length > 0)) {
     throw new Error("Provide url, sitemap, or routes to crawl.");
   }
 
   const anchor = ensureHttpUrl(input.url ?? input.sitemap ?? input.routes![0]);
   const origin = anchor.origin;
-  const queue = await seedQueue(input, origin);
+  const seed = await seedQueue(input, origin);
+  const includeRegex = compilePatterns(input.includePatterns);
+  const excludeRegex = compilePatterns(input.excludePatterns);
+  const queue = seed.urls.filter((u) => passesPatterns(u, includeRegex, excludeRegex));
   const visited = new Set<string>();
   const pageResults: CrawlPageResult[] = [];
   const skippedPages: CrawlSkippedPage[] = [];
@@ -192,6 +285,11 @@ export async function crawlSite(input: CrawlSiteInput): Promise<CrawlSiteResult>
     const current = queue.shift()!;
     if (visited.has(current)) continue;
     visited.add(current);
+
+    if (!passesPatterns(current, includeRegex, excludeRegex)) {
+      skippedPages.push({ url: current, reason: "pattern-filter" });
+      continue;
+    }
 
     if (hasNonHtmlExtension(current)) {
       skippedPages.push({ url: current, reason: "non-html-extension" });
@@ -248,6 +346,7 @@ export async function crawlSite(input: CrawlSiteInput): Promise<CrawlSiteResult>
       for (const raw of discovered) {
         const normalized = normalizeUrlForCrawl(raw, origin);
         if (!normalized) continue;
+        if (!passesPatterns(normalized, includeRegex, excludeRegex)) continue;
         if (visited.has(normalized) || queue.includes(normalized)) continue;
         if (queue.length + pageResults.length >= input.maxPages * 3) break;
         queue.push(normalized);
@@ -275,6 +374,7 @@ export async function crawlSite(input: CrawlSiteInput): Promise<CrawlSiteResult>
   return {
     ...(input.url ? { startUrl: input.url } : {}),
     ...(input.sitemap ? { sitemap: input.sitemap } : {}),
+    ...(seed.sitemapFound && !input.sitemap ? { discoveredSitemap: seed.sitemapFound } : {}),
     origin,
     pagesDiscovered: visited.size + queue.length,
     pagesEnqueued: visited.size,
