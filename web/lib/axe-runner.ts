@@ -29,7 +29,12 @@ export interface AuditResult {
   contentType?: string;
   axeVersion?: string;
   viewport?: { width: number; height: number };
+  discoveredLinks?: string[];
   timestamp: string;
+}
+
+export interface AxeRunOptions {
+  collectLinks?: boolean;
 }
 
 const DEFAULT_VIEWPORT = { width: 1280, height: 800 };
@@ -68,7 +73,7 @@ async function launchBrowser(): Promise<Browser> {
   return playwrightChromium.launch({ headless: true });
 }
 
-export async function runAxeAudit(target: string): Promise<AuditResult> {
+export async function runAxeAudit(target: string, options?: AxeRunOptions): Promise<AuditResult> {
   const browser = await launchBrowser();
   try {
     const context = await browser.newContext({
@@ -107,6 +112,16 @@ export async function runAxeAudit(target: string): Promise<AuditResult> {
       selectors: r.nodes.slice(0, 5).map((n) => n.target.join(", ")),
     }));
 
+    let discoveredLinks: string[] | undefined;
+    if (options?.collectLinks) {
+      discoveredLinks = await page.evaluate(() => {
+        const doc = (globalThis as unknown as { document: Document }).document;
+        return Array.from(doc.querySelectorAll("a[href]"))
+          .map((a) => (a as HTMLAnchorElement).href)
+          .filter(Boolean);
+      });
+    }
+
     return {
       url: target,
       violations,
@@ -114,6 +129,7 @@ export async function runAxeAudit(target: string): Promise<AuditResult> {
       incomplete: results.incomplete.length,
       incomplete_checks,
       ...(contentType ? { contentType } : {}),
+      ...(discoveredLinks ? { discoveredLinks } : {}),
       axeVersion: version,
       viewport: DEFAULT_VIEWPORT,
       timestamp: new Date().toISOString(),

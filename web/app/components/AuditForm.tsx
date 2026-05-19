@@ -3,7 +3,8 @@
 import { useState, type FormEvent } from "react";
 
 type Issue = {
-  id: string;
+  id?: string;
+  violation_id?: string;
   impact?: "critical" | "serious" | "moderate" | "minor";
   description?: string;
   help?: string;
@@ -11,16 +12,39 @@ type Issue = {
   wcag_criterion?: string;
   affected_elements?: number;
   headline?: string;
-  violation_id?: string;
 };
 
-type Result = {
+type Summary = { violations?: number; critical?: number; serious?: number; moderate?: number; minor?: number; passed?: number; total_checks?: number };
+
+type SingleResult = {
   url?: string;
   score?: number;
   grade?: string;
   wcag_level?: string;
-  summary?: { violations?: number; critical?: number; serious?: number; passed?: number };
+  summary?: Summary;
   top_issues?: Issue[];
+  axe_version?: string;
+  viewport?: { width: number; height: number };
+};
+
+type CrawlPage =
+  | { url: string; ok: true; score: number; grade: string; wcag_level: string; summary: Summary; top_issues: Issue[] }
+  | { url: string; ok: false; error: string };
+
+type CrawlResult = {
+  origin: string;
+  seed: string;
+  audited_pages: number;
+  requested_pages: number;
+  elapsed_ms: number;
+  aggregate: {
+    avg_score: number;
+    worst_page: { url: string; score: number } | null;
+    total_violations: number;
+    unique_violation_ids: string[];
+    by_impact: { critical: number; serious: number; moderate: number; minor: number };
+  };
+  pages: CrawlPage[];
 };
 
 const GRADE_COLOR: Record<string, string> = {
@@ -49,24 +73,38 @@ function Gauge({ score, grade }: { score: number; grade: string }) {
   );
 }
 
+function gradeFromScore(score: number): string {
+  if (score >= 90) return "A";
+  if (score >= 75) return "B";
+  if (score >= 55) return "C";
+  if (score >= 35) return "D";
+  return "F";
+}
+
 export default function AuditForm() {
   const [url, setUrl] = useState("");
+  const [crawl, setCrawl] = useState(false);
+  const [maxPages, setMaxPages] = useState(5);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [result, setResult] = useState<Result | null>(null);
+  const [single, setSingle] = useState<SingleResult | null>(null);
+  const [crawlData, setCrawlData] = useState<CrawlResult | null>(null);
 
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    setLoading(true); setError(null); setResult(null);
+    setLoading(true); setError(null); setSingle(null); setCrawlData(null);
+    const endpoint = crawl ? "/api/crawl" : "/api/audit";
+    const payload = crawl ? { url, max_pages: maxPages } : { url };
     try {
-      const res = await fetch("/api/audit", {
+      const res = await fetch(endpoint, {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ url }),
+        body: JSON.stringify(payload),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? `Audit failed (${res.status})`);
-      setResult(data);
+      if (crawl) setCrawlData(data);
+      else setSingle(data);
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
     } finally {
@@ -74,10 +112,10 @@ export default function AuditForm() {
     }
   }
 
-  const issues = result?.top_issues ?? [];
-  const score = result?.score ?? 0;
-  const grade = result?.grade ?? "F";
-  const noViolations = !!result && (result.summary?.violations ?? 0) === 0;
+  const issues = single?.top_issues ?? [];
+  const score = single?.score ?? 0;
+  const grade = single?.grade ?? "F";
+  const noViolations = !!single && (single.summary?.violations ?? 0) === 0;
 
   return (
     <>
@@ -97,9 +135,28 @@ export default function AuditForm() {
           spellCheck={false}
         />
         <button type="submit" disabled={loading || !url}>
-          {loading ? <><span className="spin" /> Auditing</> : <>Run audit ↗</>}
+          {loading ? <><span className="spin" /> {crawl ? "Crawling" : "Auditing"}</> : <>{crawl ? `Crawl ${maxPages} pages ↗` : "Run audit ↗"}</>}
         </button>
       </form>
+
+      <div className="audit-options">
+        <label className="audit-toggle">
+          <input
+            type="checkbox"
+            checked={crawl}
+            onChange={(e) => setCrawl(e.target.checked)}
+          />
+          <span>Crawl same-origin pages</span>
+        </label>
+        {crawl && (
+          <label className="audit-pages">
+            <span>Pages</span>
+            <select value={maxPages} onChange={(e) => setMaxPages(Number(e.target.value))}>
+              {[2, 3, 4, 5].map((n) => <option key={n} value={n}>{n}</option>)}
+            </select>
+          </label>
+        )}
+      </div>
 
       <div className="trust-line">
         <span>· No signup</span>
@@ -109,21 +166,24 @@ export default function AuditForm() {
 
       {error && <div className="error" role="alert">⚠ {error}</div>}
 
-      {result && (
+      {single && (
         <section className="result" aria-live="polite">
           <div className="result-head">
             <div><Gauge score={score} grade={grade} /></div>
             <div className="result-meta">
               <div className="mono">Report №{Date.now().toString(36).slice(-5).toUpperCase()}</div>
-              <div className="result-url">{result.url ?? url}</div>
+              <div className="result-url">{single.url ?? url}</div>
               <div className="result-grade-row">
                 <span className="chip">Grade <strong>{grade}</strong></span>
-                <span className="chip">WCAG <strong>{result.wcag_level ?? "—"}</strong></span>
-                {typeof result.summary?.violations === "number" && (
-                  <span className="chip">{result.summary.violations} violations</span>
+                <span className="chip">WCAG <strong>{single.wcag_level ?? "—"}</strong></span>
+                {typeof single.summary?.violations === "number" && (
+                  <span className="chip">{single.summary.violations} violations</span>
                 )}
-                {typeof result.summary?.critical === "number" && result.summary.critical > 0 && (
-                  <span className="chip bad">{result.summary.critical} critical</span>
+                {typeof single.summary?.critical === "number" && single.summary.critical > 0 && (
+                  <span className="chip bad">{single.summary.critical} critical</span>
+                )}
+                {typeof single.summary?.passed === "number" && (
+                  <span className="chip">{single.summary.passed} passed</span>
                 )}
               </div>
             </div>
@@ -131,10 +191,36 @@ export default function AuditForm() {
 
           {noViolations ? (
             <div className="result-empty">
-              <strong>No violations.</strong>
-              <p style={{ fontFamily: "var(--display)", fontSize: 17, marginTop: 10, color: "var(--cream-deep)" }}>
-                Page passes all axe-core checks at the audited viewport. Run the CLI for a full crawl + manual-review checklist.
-              </p>
+              <div className="result-empty-badge" aria-hidden="true">✓</div>
+              <div>
+                <strong>Clean run. Zero axe-core violations.</strong>
+                <p style={{ fontFamily: "var(--display)", fontSize: 17, marginTop: 10, color: "var(--cream-deep)" }}>
+                  {single.summary?.passed ?? 0} checks passed at {single.viewport?.width ?? 1280}×{single.viewport?.height ?? 800}
+                  {single.axe_version ? ` · axe-core ${single.axe_version}` : ""}.
+                </p>
+                <ul className="result-empty-list">
+                  <li>Automated checks catch ~30% of WCAG. Run manual screen-reader + keyboard tests for the rest.</li>
+                  <li>Re-run with <em>Crawl same-origin pages</em> to spot regressions on inner pages.</li>
+                  <li>Wire <code>loop11y</code> into CI to keep this score green: <code>npx loop11y audit {single.url ?? url} --fail-under 90</code></li>
+                </ul>
+                <div className="result-empty-actions">
+                  <button
+                    type="button"
+                    className="chip"
+                    onClick={() => { setCrawl(true); setMaxPages(5); }}
+                  >
+                    → Crawl 5 pages
+                  </button>
+                  <a
+                    className="chip"
+                    href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(`${single.url ?? url} scored ${single.score}/100 on Loop11y accessibility audit — zero axe-core violations.`)}`}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    Share result ↗
+                  </a>
+                </div>
+              </div>
             </div>
           ) : (
             <div className="result-issues">
@@ -161,6 +247,56 @@ export default function AuditForm() {
                   + {issues.length - 5} more · run <span style={{ color: "var(--lime)" }}>npx loop11y audit … --html</span> for the full visual report
                 </div>
               )}
+            </div>
+          )}
+        </section>
+      )}
+
+      {crawlData && (
+        <section className="result" aria-live="polite">
+          <div className="result-head">
+            <div><Gauge score={crawlData.aggregate.avg_score} grade={gradeFromScore(crawlData.aggregate.avg_score)} /></div>
+            <div className="result-meta">
+              <div className="mono">Crawl №{Date.now().toString(36).slice(-5).toUpperCase()}</div>
+              <div className="result-url">{crawlData.origin}</div>
+              <div className="result-grade-row">
+                <span className="chip">{crawlData.audited_pages} / {crawlData.requested_pages} pages</span>
+                <span className="chip">Avg score <strong>{crawlData.aggregate.avg_score}</strong></span>
+                <span className="chip">{crawlData.aggregate.total_violations} total violations</span>
+                {crawlData.aggregate.by_impact.critical > 0 && (
+                  <span className="chip bad">{crawlData.aggregate.by_impact.critical} critical</span>
+                )}
+                <span className="chip">{(crawlData.elapsed_ms / 1000).toFixed(1)}s</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="crawl-pages">
+            {crawlData.pages.map((p, idx) => (
+              <div key={idx} className={`crawl-page ${p.ok ? "" : "crawl-page-err"}`}>
+                <div className="crawl-page-rank">№{idx + 1}</div>
+                <div className="crawl-page-body">
+                  <div className="crawl-page-url" title={p.url}>{p.url}</div>
+                  {p.ok ? (
+                    <div className="issue-meta">
+                      <span className="chip">Score <strong>{p.score}</strong></span>
+                      <span className="chip">Grade {p.grade}</span>
+                      <span className="chip">{p.summary.violations ?? 0} viol</span>
+                      {(p.summary.critical ?? 0) > 0 && (
+                        <span className="chip bad">{p.summary.critical} critical</span>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="issue-meta"><span className="chip bad">failed</span> <span style={{ color: "var(--ink-faint)" }}>{p.error}</span></div>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {crawlData.aggregate.worst_page && (
+            <div className="mono-md" style={{ color: "var(--ink-faint)", marginTop: 12 }}>
+              Worst page: <span style={{ color: "var(--lime)" }}>{crawlData.aggregate.worst_page.url}</span> ({crawlData.aggregate.worst_page.score}/100)
             </div>
           )}
         </section>

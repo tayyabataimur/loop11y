@@ -1,4 +1,4 @@
-import { runAxeAudit, type Violation, type IncompleteCheck } from "./axe-runner";
+import { runAxeAudit, type Violation, type IncompleteCheck, type AxeRunOptions } from "./axe-runner";
 
 type Grade = "A" | "B" | "C" | "D" | "F";
 type WcagLevel = "AAA" | "AA" | "A" | "Partial A" | "Non-compliant";
@@ -41,6 +41,7 @@ export interface EvaluateResult {
   content_type?: string;
   axe_version?: string;
   viewport?: { width: number; height: number };
+  discovered_links?: string[];
   ai_summary: string;
 }
 
@@ -207,8 +208,8 @@ function buildAiSummary(r: Omit<EvaluateResult, "ai_summary">): string {
   return lines.join("\n");
 }
 
-export async function evaluateUrl(url: string): Promise<EvaluateResult> {
-  const audit = await runAxeAudit(url);
+export async function evaluateUrl(url: string, options?: AxeRunOptions): Promise<EvaluateResult> {
+  const audit = await runAxeAudit(url, options);
   const score = calculateScore(audit.violations);
   const grade = scoreToGrade(score);
   const wcag_level = deriveWcagLevel(audit.violations);
@@ -239,6 +240,7 @@ export async function evaluateUrl(url: string): Promise<EvaluateResult> {
     ...(audit.contentType ? { content_type: audit.contentType } : {}),
     ...(audit.axeVersion ? { axe_version: audit.axeVersion } : {}),
     ...(audit.viewport ? { viewport: audit.viewport } : {}),
+    ...(audit.discoveredLinks ? { discovered_links: audit.discoveredLinks } : {}),
   };
   return { ...partial, ai_summary: buildAiSummary(partial) };
 }

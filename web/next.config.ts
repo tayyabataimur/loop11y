@@ -6,6 +6,7 @@ const config: NextConfig = {
   serverExternalPackages: ["@sparticuz/chromium", "playwright-core"],
   outputFileTracingIncludes: {
     "/api/audit": ["./node_modules/@sparticuz/chromium/**"],
+    "/api/crawl": ["./node_modules/@sparticuz/chromium/**"],
   },
 };
 
