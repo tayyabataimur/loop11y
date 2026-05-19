@@ -84,13 +84,17 @@ export default function AuditForm() {
       <form className="audit-form" onSubmit={onSubmit}>
         <span className="prefix" aria-hidden="true">https://</span>
         <input
-          type="url"
+          type="text"
+          inputMode="url"
           required
           placeholder="your-site.com"
           value={url.replace(/^https?:\/\//, "")}
           onChange={(e) => setUrl(`https://${e.target.value.replace(/^https?:\/\//, "")}`)}
           aria-label="URL to audit"
           autoComplete="url"
+          autoCapitalize="none"
+          autoCorrect="off"
+          spellCheck={false}
         />
         <button type="submit" disabled={loading || !url}>
           {loading ? <><span className="spin" /> Auditing</> : <>Run audit ↗</>}
