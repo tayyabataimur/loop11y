@@ -4,6 +4,7 @@ src/.DS_Store
 dist/
 .env
 .env.*
+!.env.example
 playwright-report/
 coverage/
 *.log
