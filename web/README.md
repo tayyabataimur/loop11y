@@ -1,6 +1,8 @@
 # Loop11y — Web Demo
 
-Public site. Paste a URL → accessibility report. Runs entirely on Vercel — no external API.
+Public site at [loop11y.tayyaba.dev](https://loop11y.tayyaba.dev). Paste a URL → audit → insight → fix loop. Runs entirely on Vercel — no external API.
+
+![Loop11y site hero](./public/hero.png)
 
 ## Deploy to Vercel
 
