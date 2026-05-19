@@ -5,6 +5,7 @@ import { authConfigSchema, type AuthConfig } from "../core/auth.js";
 export const crawlSiteSchema = z.object({
   url: z.string().optional().describe("Starting URL to crawl. Use for same-origin link discovery."),
   sitemap: z.string().optional().describe("Optional sitemap.xml URL to seed the crawl queue."),
+  routes: z.array(z.string()).optional().describe("Explicit list of route paths/URLs to seed the crawl queue."),
   maxPages: z.number().int().min(1).max(200).default(20).describe("Maximum pages to audit."),
   auth: authConfigSchema.optional(),
 });
@@ -22,6 +23,11 @@ export interface CrawlPageResult {
   top_issue_ids: string[];
 }
 
+export interface CrawlSkippedPage {
+  url: string;
+  reason: string;
+}
+
 export interface CrawlAggregateViolation {
   violation_id: string;
   pages: number;
@@ -34,14 +40,51 @@ export interface CrawlSiteResult {
   sitemap?: string;
   origin: string;
   pagesDiscovered: number;
+  pagesEnqueued: number;
   pagesAudited: number;
   pagesSkipped: number;
+  skippedPages: CrawlSkippedPage[];
   averageScore: number;
   lowestScore?: { url: string; score: number };
   highestScore?: { url: string; score: number };
   topViolations: CrawlAggregateViolation[];
   pageResults: CrawlPageResult[];
   timestamp: string;
+}
+
+const NON_HTML_EXTENSIONS = new Set([
+  ".css", ".js", ".mjs", ".cjs", ".json", ".webmanifest", ".map",
+  ".png", ".jpg", ".jpeg", ".gif", ".svg", ".webp", ".avif", ".ico", ".bmp",
+  ".woff", ".woff2", ".ttf", ".otf", ".eot",
+  ".mp4", ".webm", ".mov", ".mp3", ".wav", ".ogg",
+  ".pdf", ".zip", ".tar", ".gz", ".rar",
+  ".xml", ".txt", ".csv", ".rss", ".atom",
+]);
+
+function urlExtension(url: string): string {
+  try {
+    const u = new URL(url);
+    const path = u.pathname;
+    const dot = path.lastIndexOf(".");
+    const slash = path.lastIndexOf("/");
+    if (dot > slash) return path.slice(dot).toLowerCase();
+    return "";
+  } catch {
+    return "";
+  }
+}
+
+function hasNonHtmlExtension(url: string): boolean {
+  const ext = urlExtension(url);
+  if (!ext) return false;
+  if (ext === ".html" || ext === ".htm" || ext === ".xhtml") return false;
+  return NON_HTML_EXTENSIONS.has(ext);
+}
+
+function isHtmlContentType(ct: string | undefined): boolean {
+  if (!ct) return true;
+  const lower = ct.toLowerCase();
+  return lower.includes("text/html") || lower.includes("application/xhtml");
 }
 
 function ensureHttpUrl(value: string): URL {
@@ -62,15 +105,6 @@ function normalizeUrlForCrawl(raw: string, origin: string): string | null {
   } catch {
     return null;
   }
-}
-
-function extractLinksFromHtml(html: string, origin: string): string[] {
-  const links = new Set<string>();
-  for (const match of html.matchAll(/href=["']([^"'#]+)["']/gi)) {
-    const normalized = normalizeUrlForCrawl(match[1], origin);
-    if (normalized) links.add(normalized);
-  }
-  return [...links];
 }
 
 function extractUrlsFromSitemap(xml: string, origin: string): string[] {
@@ -104,6 +138,20 @@ async function fetchText(url: string, auth?: AuthConfig): Promise<string> {
   return response.text();
 }
 
+async function checkContentTypeIsHtml(url: string, auth?: AuthConfig): Promise<{ ok: boolean; contentType?: string }> {
+  try {
+    const head = await fetch(url, { method: "HEAD", headers: buildFetchHeaders(auth) });
+    if (head.ok || head.status === 405) {
+      const ct = head.headers.get("content-type") ?? undefined;
+      if (head.status === 405) return { ok: true };
+      return { ok: isHtmlContentType(ct), ...(ct ? { contentType: ct } : {}) };
+    }
+    return { ok: true };
+  } catch {
+    return { ok: true };
+  }
+}
+
 async function seedQueue(input: CrawlSiteInput, origin: string): Promise<string[]> {
   const urls = new Set<string>();
 
@@ -117,32 +165,57 @@ async function seedQueue(input: CrawlSiteInput, origin: string): Promise<string[
     if (normalized) urls.add(normalized);
   }
 
+  if (input.routes) {
+    for (const route of input.routes) {
+      const normalized = normalizeUrlForCrawl(route, origin);
+      if (normalized) urls.add(normalized);
+    }
+  }
+
   return [...urls];
 }
 
 export async function crawlSite(input: CrawlSiteInput): Promise<CrawlSiteResult> {
-  if (!input.url && !input.sitemap) {
-    throw new Error("Provide either url or sitemap to crawl.");
+  if (!input.url && !input.sitemap && !(input.routes && input.routes.length > 0)) {
+    throw new Error("Provide url, sitemap, or routes to crawl.");
   }
 
-  const anchor = ensureHttpUrl(input.url ?? input.sitemap!);
+  const anchor = ensureHttpUrl(input.url ?? input.sitemap ?? input.routes![0]);
   const origin = anchor.origin;
   const queue = await seedQueue(input, origin);
   const visited = new Set<string>();
   const pageResults: CrawlPageResult[] = [];
+  const skippedPages: CrawlSkippedPage[] = [];
   const violationMap = new Map<string, CrawlAggregateViolation>();
-  let pagesSkipped = 0;
 
   while (queue.length > 0 && pageResults.length < input.maxPages) {
     const current = queue.shift()!;
     if (visited.has(current)) continue;
     visited.add(current);
 
+    if (hasNonHtmlExtension(current)) {
+      skippedPages.push({ url: current, reason: "non-html-extension" });
+      continue;
+    }
+
+    const ctCheck = await checkContentTypeIsHtml(current, input.auth);
+    if (!ctCheck.ok) {
+      skippedPages.push({ url: current, reason: `non-html-content-type${ctCheck.contentType ? `:${ctCheck.contentType}` : ""}` });
+      continue;
+    }
+
     try {
-      const [html, evaluation] = await Promise.all([
-        fetchText(current, input.auth),
-        evaluateUrl({ url: current, include_html_snippets: false, ...(input.auth ? { auth: input.auth } : {}) }),
-      ]);
+      const evaluation = await evaluateUrl({
+        url: current,
+        include_html_snippets: false,
+        ...(input.auth ? { auth: input.auth } : {}),
+        axe: { collectLinks: true },
+      });
+
+      if (evaluation.content_type && !isHtmlContentType(evaluation.content_type)) {
+        skippedPages.push({ url: current, reason: `non-html-content-type:${evaluation.content_type}` });
+        continue;
+      }
 
       const pageResult: CrawlPageResult = {
         url: current,
@@ -171,13 +244,16 @@ export async function crawlSite(input: CrawlSiteInput): Promise<CrawlSiteResult>
         }
       }
 
-      for (const discovered of extractLinksFromHtml(html, origin)) {
-        if (!visited.has(discovered) && !queue.includes(discovered) && queue.length + pageResults.length < input.maxPages * 3) {
-          queue.push(discovered);
-        }
+      const discovered = evaluation.discovered_links ?? [];
+      for (const raw of discovered) {
+        const normalized = normalizeUrlForCrawl(raw, origin);
+        if (!normalized) continue;
+        if (visited.has(normalized) || queue.includes(normalized)) continue;
+        if (queue.length + pageResults.length >= input.maxPages * 3) break;
+        queue.push(normalized);
       }
-    } catch {
-      pagesSkipped += 1;
+    } catch (err) {
+      skippedPages.push({ url: current, reason: `audit-error:${err instanceof Error ? err.message : String(err)}` });
     }
   }
 
@@ -201,8 +277,10 @@ export async function crawlSite(input: CrawlSiteInput): Promise<CrawlSiteResult>
     ...(input.sitemap ? { sitemap: input.sitemap } : {}),
     origin,
     pagesDiscovered: visited.size + queue.length,
+    pagesEnqueued: visited.size,
     pagesAudited: pageResults.length,
-    pagesSkipped,
+    pagesSkipped: skippedPages.length,
+    skippedPages,
     averageScore,
     ...(lowest ? { lowestScore: { url: lowest.url, score: lowest.score } } : {}),
     ...(highest ? { highestScore: { url: highest.url, score: highest.score } } : {}),

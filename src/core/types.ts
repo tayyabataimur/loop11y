@@ -1,4 +1,6 @@
-import type { Violation } from "../lib/axe-runner.js";
+import type { Violation, IncompleteCheck } from "../lib/axe-runner.js";
+
+export type { IncompleteCheck };
 
 export type Grade = "A" | "B" | "C" | "D" | "F";
 export type WcagLevel = "AAA" | "AA" | "A" | "Partial A" | "Non-compliant";
@@ -39,6 +41,9 @@ export interface EvaluateResult {
   summary: EvaluateSummary;
   top_issues: IssueSuggestion[];
   quick_wins: IssueSuggestion[];
+  incomplete_checks: IncompleteCheck[];
+  content_type?: string;
+  discovered_links?: string[];
   passing_checks?: string[];
   ai_summary: string;
 }

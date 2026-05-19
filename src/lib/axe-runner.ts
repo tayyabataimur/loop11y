@@ -18,12 +18,27 @@ export interface Violation {
   }>;
 }
 
+export interface IncompleteCheck {
+  id: string;
+  help: string;
+  helpUrl: string;
+  nodes_count: number;
+  selectors: string[];
+}
+
 export interface AuditResult {
   url: string;
   violations: Violation[];
   passes: number;
   incomplete: number;
+  incomplete_checks: IncompleteCheck[];
+  contentType?: string;
+  discoveredLinks?: string[];
   timestamp: string;
+}
+
+export interface AxeRunOptions {
+  collectLinks?: boolean;
 }
 
 function extractWcagTags(result: Result): string[] {
@@ -48,7 +63,7 @@ function mapNode(node: NodeResult): Violation["nodes"][number] {
   };
 }
 
-export async function runAxeAudit(target: string, auth?: AuthConfig): Promise<AuditResult> {
+export async function runAxeAudit(target: string, auth?: AuthConfig, options?: AxeRunOptions): Promise<AuditResult> {
   let browser: Browser | null = null;
   let context: BrowserContext | null = null;
   let page: Page | null = null;
@@ -69,7 +84,8 @@ export async function runAxeAudit(target: string, auth?: AuthConfig): Promise<Au
       target.startsWith("data:");
     const url = isAbsoluteUrl ? target : `file://${target}`;
 
-    await page.goto(url, { waitUntil: "networkidle" });
+    const response = await page.goto(url, { waitUntil: "networkidle" });
+    const contentType = response?.headers()["content-type"];
 
     // Inject axe-core from local node_modules — no CDN dependency, works offline
     const require = createRequire(import.meta.url);
@@ -93,11 +109,33 @@ export async function runAxeAudit(target: string, auth?: AuthConfig): Promise<Au
       nodes: v.nodes.map(mapNode),
     }));
 
+    const incomplete_checks: IncompleteCheck[] = results.incomplete.map((r: Result) => ({
+      id: r.id,
+      help: r.help,
+      helpUrl: r.helpUrl,
+      nodes_count: r.nodes.length,
+      selectors: r.nodes.slice(0, 5).map((n) => n.target.join(", ")),
+    }));
+
+    let discoveredLinks: string[] | undefined;
+    if (options?.collectLinks) {
+      discoveredLinks = await page.evaluate(() => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const doc: any = (globalThis as any).document;
+        if (!doc) return [];
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        return Array.from(doc.querySelectorAll("a[href]")).map((a: any) => a.href).filter((h: string) => !!h);
+      });
+    }
+
     return {
       url,
       violations,
       passes: results.passes.length,
       incomplete: results.incomplete.length,
+      incomplete_checks,
+      ...(contentType ? { contentType } : {}),
+      ...(discoveredLinks ? { discoveredLinks } : {}),
       timestamp: new Date().toISOString(),
     };
   } finally {

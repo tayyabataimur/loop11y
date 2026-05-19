@@ -10,7 +10,7 @@ import { auditRepo } from "../tools/scan.js";
 import { crawlSite } from "../tools/crawl.js";
 
 function printHelp(): void {
-  process.stdout.write(`Loop11y CLI\n\nUsage:\n  loop11y audit <url> [--json|--markdown] [--output <file>] [auth flags]\n  loop11y audit:file <path> [--json|--markdown] [--output <file>] [auth flags]\n  loop11y audit:repo <path> [--base-url <url>] [--max-files <n>] [--json|--markdown] [--output <file>] [auth flags]\n  loop11y crawl --url <url> [--max-pages <n>] [--json|--markdown] [--output <file>] [auth flags]\n  loop11y crawl --sitemap <url> [--max-pages <n>] [--json|--markdown] [--output <file>] [auth flags]\n  loop11y verify <source-path> --url <url> [--json|--markdown] [--output <file>] [auth flags]\n  loop11y --help\n\nAuth flags:\n  --storage-state <file>\n  --basic-auth-user <user> --basic-auth-pass <pass>\n  --header "Name: Value"   (repeatable)\n\nThreshold flags:\n  --fail-on <critical|serious|moderate|minor>\n  --max-violations <n>\n  --baseline <report.json>\n\nNotes:\n  - No arguments starts MCP server mode\n  - Crawl currently supports same-origin discovery and sitemap seeding\n`);
+  process.stdout.write(`Loop11y CLI\n\nUsage:\n  loop11y audit <url> [--json|--markdown] [--output <file>] [auth flags]\n  loop11y audit:file <path> [--json|--markdown] [--output <file>] [auth flags]\n  loop11y audit:repo <path> [--base-url <url>] [--max-files <n>] [--json|--markdown] [--output <file>] [auth flags]\n  loop11y crawl --url <url> [--max-pages <n>] [--json|--markdown] [--output <file>] [auth flags]\n  loop11y crawl --sitemap <url> [--max-pages <n>] [--json|--markdown] [--output <file>] [auth flags]\n  loop11y crawl --routes <file> [--max-pages <n>] [--json|--markdown] [--output <file>] [auth flags]\n  loop11y verify <source-path> --url <url> [--json|--markdown] [--output <file>] [auth flags]\n  loop11y --help\n\nAuth flags:\n  --storage-state <file>\n  --basic-auth-user <user> --basic-auth-pass <pass>\n  --header "Name: Value"   (repeatable)\n\nThreshold flags:\n  --fail-on <critical|serious|moderate|minor>\n  --max-violations <n>\n  --baseline <report.json>\n\nNotes:\n  - No arguments starts MCP server mode\n  - Crawl currently supports same-origin discovery and sitemap seeding\n`);
 }
 
 function readFlagValue(args: string[], name: string): string | undefined {
@@ -259,13 +259,20 @@ export async function runCli(rawArgs: string[]): Promise<void> {
     case "crawl": {
       const url = readFlagValue(args, "--url");
       const sitemap = readFlagValue(args, "--sitemap");
+      const routesPath = readFlagValue(args, "--routes");
       const maxPages = parseMaxFiles(readFlagValue(args, "--max-pages")) ?? 20;
-      if (!url && !sitemap) {
-        throw new Error("Usage: loop11y crawl --url <url> | --sitemap <url> [--max-pages <n>] [--json|--markdown] [--output <file>]");
+      let routes: string[] | undefined;
+      if (routesPath) {
+        const raw = readFileSync(normalizeExistingPath(routesPath), "utf-8");
+        routes = raw.split(/\r?\n/).map((line) => line.trim()).filter((line) => line.length > 0 && !line.startsWith("#"));
+      }
+      if (!url && !sitemap && !(routes && routes.length > 0)) {
+        throw new Error("Usage: loop11y crawl --url <url> | --sitemap <url> | --routes <file> [--max-pages <n>] [--json|--markdown] [--output <file>]");
       }
       const result = await crawlSite({
         ...(url ? { url } : {}),
         ...(sitemap ? { sitemap } : {}),
+        ...(routes ? { routes } : {}),
         maxPages,
         ...(auth ? { auth } : {}),
       });

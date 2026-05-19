@@ -44,6 +44,19 @@ function renderEvaluateMarkdown(result: EvaluateResult): string {
   lines.push(result.ai_summary);
   lines.push("");
 
+  if (result.incomplete_checks && result.incomplete_checks.length > 0) {
+    lines.push(`## Incomplete Checks`);
+    lines.push("");
+    lines.push("Items axe-core could not fully evaluate. Manual review required.");
+    lines.push("");
+    for (const ic of result.incomplete_checks) {
+      lines.push(`- **${ic.id}** — ${ic.help} (${ic.nodes_count} node${ic.nodes_count === 1 ? "" : "s"})`);
+      if (ic.selectors.length > 0) lines.push(`  - Selectors: ${ic.selectors.join(", ")}`);
+      lines.push(`  - Learn more: ${ic.helpUrl}`);
+    }
+    lines.push("");
+  }
+
   if (result.quick_wins.length > 0) {
     lines.push(`## Quick Wins`);
     lines.push("");
@@ -146,12 +159,22 @@ function renderCrawlMarkdown(result: CrawlSiteResult): string {
   if (result.startUrl) lines.push(`- **Start URL:** ${result.startUrl}`);
   if (result.sitemap) lines.push(`- **Sitemap:** ${result.sitemap}`);
   lines.push(`- **Timestamp:** ${result.timestamp}`);
+  lines.push(`- **Pages enqueued:** ${result.pagesEnqueued}`);
   lines.push(`- **Pages audited:** ${result.pagesAudited}`);
   lines.push(`- **Pages skipped:** ${result.pagesSkipped}`);
   lines.push(`- **Average score:** ${result.averageScore}`);
   if (result.lowestScore) lines.push(`- **Lowest score:** ${result.lowestScore.score} (${result.lowestScore.url})`);
   if (result.highestScore) lines.push(`- **Highest score:** ${result.highestScore.score} (${result.highestScore.url})`);
   lines.push("");
+
+  if (result.skippedPages && result.skippedPages.length > 0) {
+    lines.push(`## Skipped URLs`);
+    lines.push("");
+    for (const skip of result.skippedPages.slice(0, 25)) {
+      lines.push(`- ${skip.url} — ${skip.reason}`);
+    }
+    lines.push("");
+  }
 
   if (result.topViolations.length > 0) {
     lines.push(`## Top Violations Across Pages`);

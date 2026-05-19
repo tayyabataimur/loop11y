@@ -1,6 +1,7 @@
 import { runAxeAudit, type Violation } from "../lib/axe-runner.js";
 import { AUTO_FIXABLE } from "../lib/patcher.js";
 import type { EvaluateOptions, EvaluateResult, Grade, IssueSuggestion, WcagLevel } from "./types.js";
+import type { AxeRunOptions } from "../lib/axe-runner.js";
 
 const IMPACT_DEDUCTION: Record<Violation["impact"], { base: number; perNode: number; cap: number }> = {
   critical: { base: 15, perNode: 1.5, cap: 25 },
@@ -211,8 +212,8 @@ function buildAiSummary(result: Omit<EvaluateResult, "ai_summary">): string {
   return lines.join("\n");
 }
 
-export async function evaluateUrl(options: EvaluateOptions): Promise<EvaluateResult> {
-  const audit = await runAxeAudit(options.url, options.auth);
+export async function evaluateUrl(options: EvaluateOptions & { axe?: AxeRunOptions }): Promise<EvaluateResult> {
+  const audit = await runAxeAudit(options.url, options.auth, options.axe);
   const score = calculateScore(audit.violations);
   const grade = scoreToGrade(score);
   const wcag_level = deriveWcagLevel(audit.violations);
@@ -242,6 +243,9 @@ export async function evaluateUrl(options: EvaluateOptions): Promise<EvaluateRes
     summary,
     top_issues,
     quick_wins,
+    incomplete_checks: audit.incomplete_checks,
+    ...(audit.contentType ? { content_type: audit.contentType } : {}),
+    ...(audit.discoveredLinks ? { discovered_links: audit.discoveredLinks } : {}),
   };
 
   return { ...partial, ai_summary: buildAiSummary(partial) };
