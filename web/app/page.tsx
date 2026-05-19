@@ -3,6 +3,8 @@ import AuditForm from "./components/AuditForm";
 const GITHUB = "https://github.com/tayyabataimur/loop11y";
 const NPM = "https://www.npmjs.com/package/loop11y";
 const SKILL = "https://github.com/tayyabataimur/loop11y-skill";
+const ISSUE_NO = "001";
+const ISSUE_DATE = "Spring 2026";
 
 export default function Page() {
   return (
@@ -10,12 +12,12 @@ export default function Page() {
       <Nav />
       <main>
         <Hero />
-        <TrustStrip />
+        <Marquee />
         <Features />
         <SampleReports />
         <InstallPaths />
         <Stakes />
-        <CTA />
+        <BigCTA />
       </main>
       <Footer />
     </>
@@ -26,16 +28,18 @@ function Nav() {
   return (
     <nav className="nav" aria-label="Primary">
       <div className="wrap nav-inner">
-        <a className="brand" href="/">
-          <span className="brand-mark" aria-hidden="true" />
-          Loop11y
-        </a>
-        <div className="nav-links">
-          <a href="#features">Features</a>
+        <div className="nav-left">
+          <span className="brand-mark" aria-hidden="true">L</span>
+          <span className="brand-word">Loop<em>11y</em></span>
+        </div>
+        <div className="nav-mid">
           <a href="#how">How to use</a>
-          <a href="#report">Sample report</a>
+          <a href="#report">Report</a>
+          <a href="#stakes">Why now</a>
           <a href={GITHUB} target="_blank" rel="noreferrer">GitHub</a>
-          <a className="nav-cta" href="#audit">Audit a URL</a>
+        </div>
+        <div className="nav-right">
+          <a className="nav-cta" href="#audit">Run audit ↗</a>
         </div>
       </div>
     </nav>
@@ -46,93 +50,105 @@ function Hero() {
   return (
     <section className="hero" id="audit">
       <div className="wrap">
-        <span className="hero-eyebrow">
-          <span className="tag">NEW</span> Visual-first reports · WCAG 2.2 · open source
-        </span>
+        <div className="hero-meta">
+          <span className="mono">Issue №{ISSUE_NO} · {ISSUE_DATE}</span>
+          <span className="mono">Open source · MIT · v0.1</span>
+        </div>
         <h1>
-          Accessibility audits<br />
-          your team will <span className="highlight">actually fix.</span>
+          <span className="it">Accessibility,</span><br />
+          in one <span className="underline">paste.</span>
         </h1>
-        <p className="hero-sub">
-          Paste a URL. Get a visible-first WCAG 2.2 audit with score, ranked issues,
-          and patch-ready fixes — in about ten seconds. CLI, MCP server, Agent Skill,
-          and GitHub Action included.
-        </p>
-        <AuditForm />
-      </div>
-    </section>
-  );
-}
+        <div className="hero-sub">
+          <p>
+            Paste a URL. Get a visible-first WCAG 2.2 audit with ranked issues
+            and patch-ready fixes — in about ten seconds. No signup. No email.
+          </p>
+          <aside className="hero-marginalia">
+            Built on axe-core 4.10 + Playwright. Same engine drives the <em>CLI</em>,
+            the <em>MCP server</em>, the <em>Agent Skill</em>, and the <em>GitHub Action</em>.
+          </aside>
+        </div>
 
-function TrustStrip() {
-  return (
-    <div className="trust-strip">
-      <div className="wrap trust-strip-inner">
-        <span className="trust-strip-item">Powered by axe-core 4.10</span>
-        <span className="trust-strip-item">WCAG 2.2 AA</span>
-        <span className="trust-strip-item">EN 301 549</span>
-        <span className="trust-strip-item">Section 508</span>
-        <span className="trust-strip-item">European Accessibility Act</span>
-        <span className="trust-strip-item">MIT licensed</span>
-      </div>
-    </div>
-  );
-}
-
-function Features() {
-  return (
-    <section className="block" id="features">
-      <div className="wrap">
-        <span className="section-eyebrow">What you get</span>
-        <h2 className="section-title">Not another rule dump. A fix plan.</h2>
-        <p className="section-sub">
-          Loop11y ranks visible failures first — colour contrast, theme, font, tap targets —
-          then explains user impact in plain language and ships patch-ready code.
-        </p>
-        <div className="grid grid-3">
-          <Feature
-            icon={<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="9" /><path d="M12 3v18M3 12h18" /></svg>}
-            title="Visible-first ranking"
-            body="Contrast, theme, font, and tap-target failures are what users notice. We rank them above semantic-only issues so the fix list reflects perceived quality."
-          />
-          <Feature
-            icon={<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 7l4 4 8-8" /><path d="M4 17l4 4 8-8" /></svg>}
-            title="Auto-fix that is honest"
-            body="Mechanical fixes (lang attribute, button names, alt-empty for decorative) apply automatically. Anything that needs judgement (alt copy, contrast colour) goes to assisted mode. We never invent meaning."
-          />
-          <Feature
-            icon={<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 12h4l3-9 4 18 3-9h4" /></svg>}
-            title="Before / after diff"
-            body="One command renders side-by-side resolved, new, and still-present issues so reviewers see the delta in seconds — not a wall of JSON."
-          />
-          <Feature
-            icon={<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="7" height="7" rx="1" /><rect x="14" y="3" width="7" height="7" rx="1" /><rect x="3" y="14" width="7" height="7" rx="1" /><rect x="14" y="14" width="7" height="7" rx="1" /></svg>}
-            title="Self-contained HTML report"
-            body="Single file, inline CSS + SVG. Email it, commit it, attach to a Jira ticket. Score gauge, severity bar, WCAG badges, manual-review section."
-          />
-          <Feature
-            icon={<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 3h18v18H3z" /><path d="M3 9h18M9 3v18" /></svg>}
-            title="Repo-wide source mapping"
-            body="audit:repo scans React, Vue, Svelte, Angular, and plain HTML; maps every violation back to the source file with a confidence score."
-          />
-          <Feature
-            icon={<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2v6M12 16v6M2 12h6M16 12h6M5 5l3 3M16 16l3 3M5 19l3-3M16 8l3-3" /></svg>}
-            title="Pratfall-honest"
-            body="Every report includes a 'needs manual review' section listing what axe-core could not decide. We tell you what the tool cannot catch — not the opposite."
-          />
+        <div className="audit-block">
+          <div className="audit-label">▸ Run an audit</div>
+          <AuditForm />
         </div>
       </div>
     </section>
   );
 }
 
-function Feature({ icon, title, body }: { icon: React.ReactNode; title: string; body: string }) {
+function Marquee() {
+  const items = [
+    "WCAG 2.2 AA", "EN 301 549", "Section 508",
+    "European Accessibility Act 2025", "axe-core 4.10",
+    "MCP Protocol", "Open Source · MIT", "WCAG 2.2 AA", "EN 301 549",
+    "Section 508", "European Accessibility Act 2025", "axe-core 4.10",
+    "MCP Protocol", "Open Source · MIT",
+  ];
   return (
-    <article className="feature">
-      <div className="feature-icon">{icon}</div>
-      <h3>{title}</h3>
-      <p>{body}</p>
-    </article>
+    <div className="marquee" aria-hidden="true">
+      <div className="marquee-track">
+        {items.map((t, i) => <span key={i}>{t}</span>)}
+      </div>
+    </div>
+  );
+}
+
+function Features() {
+  const feats = [
+    {
+      n: "F.01",
+      title: <>Visible-first <em>ranking</em></>,
+      body: "Contrast, theme, font, and tap-target failures are what users actually notice. We rank them above semantic-only issues so the fix list reflects perceived quality, not rule fatigue.",
+    },
+    {
+      n: "F.02",
+      title: <>Honest <em>auto-fix</em></>,
+      body: "Mechanical fixes (lang attribute, button names, decorative alt-empty) apply automatically. Anything that needs judgement goes to assisted mode. We never invent alt text.",
+    },
+    {
+      n: "F.03",
+      title: <>Before / after <em>diff</em></>,
+      body: "One command renders side-by-side resolved, newly-introduced, and still-present issues so reviewers see the delta in seconds — not a wall of JSON.",
+    },
+    {
+      n: "F.04",
+      title: <>Self-contained <em>HTML</em></>,
+      body: "Single file, inline CSS + SVG. Email it, commit it, attach it to a Jira ticket. Score gauge, severity bar, WCAG badges, manual-review section, all in one click.",
+    },
+    {
+      n: "F.05",
+      title: <>Repo-wide <em>source mapping</em></>,
+      body: "audit:repo scans React, Vue, Svelte, Angular, and plain HTML; maps every violation back to the source file with a confidence score for one-shot diffs.",
+    },
+    {
+      n: "F.06",
+      title: <>Pratfall-<em>honest</em></>,
+      body: "Every report includes a manual-review section listing what axe-core could not decide. We tell you what the tool cannot catch — not the opposite.",
+    },
+  ];
+  return (
+    <section className="block" id="features">
+      <div className="wrap">
+        <div className="section-head">
+          <div className="section-num">Chapter <strong>01</strong> Features</div>
+          <div>
+            <h2>Not another rule dump. A <em>fix plan.</em></h2>
+            <p className="section-sub">Most accessibility tools stop at detection. Loop11y closes the loop: explain, rank, patch, verify.</p>
+          </div>
+        </div>
+        <div className="feat-grid">
+          {feats.map((f) => (
+            <article key={f.n} className="feat">
+              <div className="feat-num">{f.n}</div>
+              <h3 className="feat-title">{f.title}</h3>
+              <p className="feat-body">{f.body}</p>
+            </article>
+          ))}
+        </div>
+      </div>
+    </section>
   );
 }
 
@@ -140,20 +156,34 @@ function SampleReports() {
   return (
     <section className="block" id="report">
       <div className="wrap">
-        <span className="section-eyebrow">The report</span>
-        <h2 className="section-title">Generate it for your site in one command.</h2>
-        <p className="section-sub">
-          The same report you see below is what powers this page — generated locally, no SaaS storage.
-        </p>
-        <div className="sample-grid">
-          <a href="https://htmlpreview.github.io/?https://github.com/tayyabataimur/loop11y/blob/main/examples/sample-report.html" target="_blank" rel="noreferrer" className="sample-card" aria-label="Open sample audit report">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/sample-report.jpg" alt="Loop11y audit report: score gauge, severity bar, three top-issue cards with WCAG badges" loading="lazy" />
-          </a>
-          <a href="https://htmlpreview.github.io/?https://github.com/tayyabataimur/loop11y/blob/main/examples/sample-diff-report.html" target="_blank" rel="noreferrer" className="sample-card" aria-label="Open sample before/after diff report">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/sample-diff-report.jpg" alt="Loop11y before/after diff: +32 score delta, resolved issues, newly introduced issues" loading="lazy" />
-          </a>
+        <div className="section-head">
+          <div className="section-num">Chapter <strong>02</strong> The Report</div>
+          <div>
+            <h2>Generated locally. Shared <em>anywhere.</em></h2>
+            <p className="section-sub">A single self-contained HTML file. No JS runtime, no SaaS storage. The same report you see below is what you generate for your site.</p>
+          </div>
+        </div>
+        <div className="samples">
+          <figure>
+            <a href="https://htmlpreview.github.io/?https://github.com/tayyabataimur/loop11y/blob/main/examples/sample-report.html" target="_blank" rel="noreferrer">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/sample-report.jpg" alt="Loop11y audit report: score gauge, severity bar, three top-issue cards with WCAG badges" loading="lazy" />
+            </a>
+            <figcaption>
+              <span>FIG. A · Audit report</span>
+              <a href="https://htmlpreview.github.io/?https://github.com/tayyabataimur/loop11y/blob/main/examples/sample-report.html" target="_blank" rel="noreferrer">Open live ↗</a>
+            </figcaption>
+          </figure>
+          <figure>
+            <a href="https://htmlpreview.github.io/?https://github.com/tayyabataimur/loop11y/blob/main/examples/sample-diff-report.html" target="_blank" rel="noreferrer">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/sample-diff-report.jpg" alt="Loop11y before/after diff: +32 score delta, resolved issues, newly introduced issues" loading="lazy" />
+            </a>
+            <figcaption>
+              <span>FIG. B · Before / after diff</span>
+              <a href="https://htmlpreview.github.io/?https://github.com/tayyabataimur/loop11y/blob/main/examples/sample-diff-report.html" target="_blank" rel="noreferrer">Open live ↗</a>
+            </figcaption>
+          </figure>
         </div>
       </div>
     </section>
@@ -163,56 +193,64 @@ function SampleReports() {
 function InstallPaths() {
   const paths = [
     {
-      name: "Agent Skill",
-      blurb: "One-line install for Claude Code, Cursor, Cline, Codex, Aider, and 50+ other agents.",
-      code: <><span className="prompt">$</span> npx skills add tayyabataimur/loop11y-skill -g -a <span className="arg">claude-code</span></>,
-      cta: { href: SKILL, label: "skill repo →" },
+      title: "Agent Skill",
+      blurb: (<>One-line install for Claude Code, Cursor, Cline, Codex, Aider, and <a href="https://skills.sh" target="_blank" rel="noreferrer">50+ other agents</a>. Guided prompting on top of the MCP server.</>),
+      code: (
+        <><span className="prompt">$</span> npx skills add tayyabataimur/loop11y-skill -g -a <span className="arg">claude-code</span></>
+      ),
     },
     {
-      name: "CLI",
-      blurb: "No setup. Runs locally, no SaaS storage. JSON, Markdown, SARIF, or HTML output.",
-      code: <><span className="prompt">$</span> npx -y loop11y audit https://your-site.com --html --output report.html</>,
-      cta: { href: NPM, label: "npm package →" },
+      title: "CLI",
+      blurb: (<>Runs locally — no SaaS, no telemetry. JSON, Markdown, SARIF, or single-file HTML output. <a href={NPM} target="_blank" rel="noreferrer">npm package</a>.</>),
+      code: (
+        <><span className="prompt">$</span> npx -y loop11y audit https://your-site.com --html --output <span className="arg">report.html</span></>
+      ),
     },
     {
-      name: "MCP server",
-      blurb: "stdio + HTTP transport. Works with Claude Desktop, Claude Code, Cursor, Cline, and any MCP-compatible agent.",
-      code: <><span className="prompt">$</span> npx -y loop11y                  <span style={{ color: "var(--fg-dim)" }}># starts MCP server on stdio</span></>,
-      cta: { href: `${GITHUB}#1-mcp-server-claude-cursor-cline-copilot`, label: "MCP setup →" },
+      title: "MCP server",
+      blurb: (<>stdio + streamable-HTTP transport. Works with Claude Desktop, Claude Code, Cursor, Cline, and any MCP-compatible agent.</>),
+      code: (
+        <><span className="prompt">$</span> npx -y loop11y    <span className="comment"># starts MCP server on stdio</span></>
+      ),
     },
     {
-      name: "GitHub Action",
-      blurb: "Gate PRs by accessibility score. Posts a Markdown report as a PR comment.",
-      code: <><span className="prompt"># .github/workflows/a11y.yml</span>{"\n"}uses: tayyabataimur/loop11y@v0.1.0{"\n"}with: {`{ url: 'https://your-preview.vercel.app', fail-under: 90 }`}</>,
-      cta: { href: `${GITHUB}#5-github-action`, label: "action docs →" },
+      title: "GitHub Action",
+      blurb: (<>Gate PRs on accessibility score. Posts a Markdown report as a PR comment and fails the check below your threshold.</>),
+      code: (
+        <>
+          <span className="comment"># .github/workflows/a11y.yml</span>{"\n"}
+          uses: tayyabataimur/loop11y@<span className="arg">v0.1.0</span>{"\n"}
+          with: {`{ url: https://preview.app, fail-under: 90 }`}
+        </>
+      ),
     },
     {
-      name: "HTTP API",
-      blurb: "OpenAPI-spec backend. Build a custom GPT, Chat bot, or in-house dashboard.",
-      code: <><span className="prompt">$</span> curl -X POST https://a11y-api.fly.dev/api/evaluate -d {`'{"url":"https://your-site.com"}'`}</>,
-      cta: { href: `${GITHUB}#4-http-api--openapi--chatgpt-gpt-action`, label: "OpenAPI spec →" },
+      title: "HTTP API",
+      blurb: (<>OpenAPI-spec backend. Build a custom GPT, chat bot, or in-house dashboard. Self-host via Docker or Fly.</>),
+      code: (
+        <><span className="prompt">$</span> curl -X POST localhost:3000/api/evaluate -d {`'{ "url": "https://your-site.com" }'`}</>
+      ),
     },
   ];
   return (
     <section className="block" id="how">
       <div className="wrap">
-        <span className="section-eyebrow">How to use it</span>
-        <h2 className="section-title">Five surfaces. One open-source engine.</h2>
-        <p className="section-sub">
-          Same toolset everywhere — pick the surface that matches where you work. All five run the same axe-core 4.10 audit pipeline, no vendor lock-in.
-        </p>
+        <div className="section-head">
+          <div className="section-num">Chapter <strong>03</strong> Surfaces</div>
+          <div>
+            <h2>Five surfaces. One <em>open-source engine.</em></h2>
+            <p className="section-sub">Pick the surface that matches where you work. All five run the same axe-core 4.10 audit pipeline. No vendor lock-in, no per-seat pricing.</p>
+          </div>
+        </div>
         <div className="paths">
           {paths.map((p, i) => (
-            <article key={p.name} className="path">
+            <article key={p.title} className="path">
+              <div className="path-num">{String(i + 1).padStart(2, "0")}</div>
               <div className="path-head">
-                <div className="path-num">{i + 1}</div>
-                <div className="path-body">
-                  <strong>{p.name}</strong>
-                  <span>{p.blurb}</span>
-                </div>
-                <a className="path-cta" href={p.cta.href} target="_blank" rel="noreferrer">{p.cta.label}</a>
+                <strong>{p.title}</strong>
+                <span>{p.blurb}</span>
               </div>
-              <pre className="code"><code>{p.code}</code></pre>
+              <pre className="path-code"><code>{p.code}</code></pre>
             </article>
           ))}
         </div>
@@ -223,45 +261,44 @@ function InstallPaths() {
 
 function Stakes() {
   return (
-    <section className="block">
+    <section className="block" id="stakes">
       <div className="wrap">
-        <span className="section-eyebrow">Why it matters</span>
-        <h2 className="section-title">The accessibility deadline already passed.</h2>
-        <p className="section-sub">
-          The European Accessibility Act took effect on 28 June 2025. Most public-facing products
-          sold in the EU now need to meet WCAG 2.2 AA. Audits stopped being optional.
-        </p>
-        <div className="stakes-grid">
-          <Stake num="1 in 4" label="adults in the EU live with a disability that affects digital use (Eurostat)." />
-          <Stake num="€20k+" label="per-violation administrative fines under the EAA in member states like Germany and France." />
-          <Stake num="71%" label="of users with disabilities will leave a site they cannot use (WebAIM 2024)." />
-          <Stake num="96.3%" label="of the world's top 1,000,000 homepages had at least one WCAG failure last audit (WebAIM Million 2024)." />
+        <div className="section-head">
+          <div className="section-num">Chapter <strong>04</strong> Stakes</div>
+          <div>
+            <h2>The deadline already <em>passed.</em></h2>
+            <p className="section-sub">The European Accessibility Act took effect on 28 June 2025. Most public-facing products sold in the EU now need to meet WCAG 2.2 AA. Audits stopped being optional.</p>
+          </div>
+        </div>
+        <div className="stakes">
+          <Stake num="1" suffix="in 4" label="adults in the EU live with a disability that affects digital use (Eurostat)." />
+          <Stake num="€20k" suffix="+ per breach" label="administrative fines under EAA in DE and FR." />
+          <Stake num="71" suffix="%" label="of disabled users leave a site they cannot use (WebAIM 2024)." />
+          <Stake num="96" suffix=".3%" label="of the world's top 1M homepages had a WCAG failure last audit." />
         </div>
       </div>
     </section>
   );
 }
 
-function Stake({ num, label }: { num: string; label: string }) {
+function Stake({ num, suffix, label }: { num: string; suffix: string; label: string }) {
   return (
     <div className="stake">
-      <div className="stake-num">{num}</div>
+      <div className="stake-num">{num}<small>{suffix}</small></div>
       <div className="stake-label">{label}</div>
     </div>
   );
 }
 
-function CTA() {
+function BigCTA() {
   return (
-    <section className="block">
-      <div className="wrap" style={{ textAlign: "center" }}>
-        <span className="section-eyebrow">Get started</span>
-        <h2 className="section-title" style={{ margin: "8px auto 12px" }}>Audit your site now.</h2>
-        <p className="section-sub" style={{ margin: "0 auto" }}>
-          Free, no signup, runs in your browser tab. Install the CLI to gate PRs and generate diffs.
-        </p>
-        <div className="cta-row" style={{ justifyContent: "center" }}>
-          <a className="btn btn-primary" href="#audit">↑ Audit a URL</a>
+    <section className="bigcta">
+      <div className="wrap">
+        <h2 className="bigcta-title">
+          Audit your <em>site,</em><br />now.
+        </h2>
+        <div className="bigcta-row">
+          <a className="btn btn-primary" href="#audit">↑ Run audit</a>
           <a className="btn btn-ghost" href={GITHUB} target="_blank" rel="noreferrer">★ Star on GitHub</a>
         </div>
       </div>
@@ -272,43 +309,42 @@ function CTA() {
 function Footer() {
   return (
     <footer className="footer">
-      <div className="wrap footer-inner">
-        <div>
-          <div className="brand" style={{ marginBottom: 10 }}>
-            <span className="brand-mark" aria-hidden="true" />
-            Loop11y
-          </div>
-          <div style={{ color: "var(--fg-dim)" }}>
-            Open-source accessibility for humans and AI agents. MIT licensed.
-          </div>
-          <div style={{ color: "var(--fg-dim)", marginTop: 8, fontSize: 12 }}>
-            Built by <a href="https://github.com/tayyabataimur" style={{ color: "var(--fg-muted)" }}>@tayyabataimur</a>.
-            Audit engine runs on <a href="https://playwright.dev" style={{ color: "var(--fg-muted)" }}>Playwright</a> +{" "}
-            <a href="https://github.com/dequelabs/axe-core" style={{ color: "var(--fg-muted)" }}>axe-core</a>.
-          </div>
-        </div>
+      <div className="wrap">
         <div className="footer-cols">
           <div>
-            <h4>Product</h4>
-            <a href="#features">Features</a>
-            <a href="#how">How to use</a>
-            <a href="#report">Sample report</a>
-            <a href="#audit">Audit a URL</a>
+            <h4>The product</h4>
+            <p className="footer-blurb">
+              Open-source accessibility for humans and AI agents.
+              Built by <a href="https://tayyaba.dev" target="_blank" rel="noreferrer">Tayyaba Taimur</a>.
+              Engine: <a href="https://playwright.dev" target="_blank" rel="noreferrer">Playwright</a> + <a href="https://github.com/dequelabs/axe-core" target="_blank" rel="noreferrer">axe-core</a>.
+            </p>
           </div>
           <div>
             <h4>Install</h4>
             <a href={NPM} target="_blank" rel="noreferrer">npm</a>
             <a href={SKILL} target="_blank" rel="noreferrer">Agent Skill</a>
-            <a href={`${GITHUB}#5-github-action`} target="_blank" rel="noreferrer">GitHub Action</a>
+            <a href={`${GITHUB}#github-action`} target="_blank" rel="noreferrer">GH Action</a>
             <a href={`${GITHUB}/blob/main/deploy/openapi.yaml`} target="_blank" rel="noreferrer">OpenAPI</a>
           </div>
           <div>
-            <h4>Open source</h4>
+            <h4>Source</h4>
             <a href={GITHUB} target="_blank" rel="noreferrer">GitHub</a>
             <a href={`${GITHUB}/issues`} target="_blank" rel="noreferrer">Issues</a>
             <a href={`${GITHUB}/blob/main/CHANGELOG.md`} target="_blank" rel="noreferrer">Changelog</a>
-            <a href={`${GITHUB}/blob/main/LICENSE`} target="_blank" rel="noreferrer">MIT License</a>
+            <a href={`${GITHUB}/blob/main/LICENSE`} target="_blank" rel="noreferrer">MIT</a>
           </div>
+          <div>
+            <h4>Standards</h4>
+            <a href="https://www.w3.org/TR/WCAG22/" target="_blank" rel="noreferrer">WCAG 2.2</a>
+            <a href="https://www.etsi.org/standards" target="_blank" rel="noreferrer">EN 301 549</a>
+            <a href="https://www.section508.gov/" target="_blank" rel="noreferrer">Section 508</a>
+            <a href="https://commission.europa.eu/strategy-and-policy/policies/justice-and-fundamental-rights/disability/union-equality-strategy-rights-persons-disabilities-2021-2030/european-accessibility-act_en" target="_blank" rel="noreferrer">EAA</a>
+          </div>
+        </div>
+        <p className="footer-word">Loop<span className="accent">11y</span></p>
+        <div className="footer-meta">
+          <span>© 2026 Tayyaba Taimur · MIT licensed</span>
+          <span>loop11y.tayyaba.dev · Issue №{ISSUE_NO}</span>
         </div>
       </div>
     </footer>

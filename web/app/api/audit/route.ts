@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
+import { evaluateUrl } from "../../../lib/evaluate";
 
-const API_URL = process.env.A11Y_API_URL ?? "https://a11y-api.fly.dev";
-
-export const runtime = "edge";
+export const runtime = "nodejs";
+export const maxDuration = 60;
+export const dynamic = "force-dynamic";
 
 export async function POST(req: Request) {
   let body: { url?: string };
@@ -16,8 +17,9 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "url is required" }, { status: 400 });
   }
 
+  let parsed: URL;
   try {
-    const parsed = new URL(body.url);
+    parsed = new URL(body.url);
     if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
       return NextResponse.json({ error: "Only http(s) URLs allowed" }, { status: 400 });
     }
@@ -25,12 +27,11 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Invalid URL" }, { status: 400 });
   }
 
-  const upstream = await fetch(`${API_URL}/api/evaluate`, {
-    method: "POST",
-    headers: { "content-type": "application/json" },
-    body: JSON.stringify({ url: body.url }),
-  });
-
-  const data = await upstream.json().catch(() => ({ error: "Upstream returned non-JSON" }));
-  return NextResponse.json(data, { status: upstream.status });
+  try {
+    const result = await evaluateUrl(parsed.toString());
+    return NextResponse.json(result);
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    return NextResponse.json({ error: `Audit failed: ${message}` }, { status: 500 });
+  }
 }
