@@ -5,284 +5,285 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Loop11y · https://example-shop.test</title>
 <style>
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
 :root {
-  --bg: #f6f7fb;
-  --card: #ffffff;
-  --border: #eaecf3;
-  --text: #0b1020;
-  --muted: #5d6478;
-  --accent: #7c3aed;
-  --accent-2: #4f46e5;
-  --hero-from: #0b0d17;
-  --hero-via: #1c1338;
-  --hero-to: #2a1265;
+  --cream: #ebe3cd;
+  --cream-elev: #e3d9bf;
+  --paper: #f2ead3;
+  --ink: #141210;
+  --ink-soft: #3a342b;
+  --ink-mute: #6f6859;
+  --ink-faint: #9e9583;
+  --rule: #1d1a16;
+  --rule-soft: rgba(20,18,16,0.18);
+  --lime: #c7ff2a;
+  --rust: #b34a30;
+  --display: "Instrument Serif", "Times New Roman", serif;
+  --mono: "JetBrains Mono", ui-monospace, Menlo, monospace;
 }
+
 * { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
 html { -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
 body {
-  margin: 0;
-  font-family: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  background:
-    radial-gradient(1200px 600px at 80% -10%, rgba(124,58,237,0.10), transparent 60%),
-    radial-gradient(900px 500px at -10% 10%, rgba(79,70,229,0.08), transparent 60%),
-    var(--bg);
-  color: var(--text);
-  line-height: 1.55;
-  font-feature-settings: "ss01", "cv01", "cv11";
+  background: var(--cream);
+  background-image:
+    radial-gradient(2px 2px at 16% 22%, rgba(20,18,16,0.06) 50%, transparent 51%),
+    radial-gradient(1.5px 1.5px at 84% 68%, rgba(20,18,16,0.04) 50%, transparent 51%);
+  background-size: 420px 420px, 360px 360px;
+  color: var(--ink);
+  font-family: var(--display);
+  line-height: 1.55; font-size: 17px;
 }
-.container { max-width: 1120px; margin: 0 auto; padding: 20px 24px 32px; }
+::selection { background: var(--lime); color: var(--ink); }
+a { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 1px; }
 
-.topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
-.brand { display:flex; align-items:center; gap: 10px; font-weight: 700; font-size: 16px; letter-spacing: -0.01em; color: var(--text); }
-.brand-mark {
-  width: 28px; height: 28px; border-radius: 8px;
-  background: conic-gradient(from 200deg at 50% 50%, #7c3aed, #4f46e5, #06b6d4, #7c3aed);
-  box-shadow: 0 4px 12px rgba(124,58,237,0.35), inset 0 0 0 1px rgba(255,255,255,0.4);
+.page { max-width: 1100px; margin: 0 auto; padding: 28px 32px 36px; }
+
+/* top bar */
+.top {
+  display:flex; align-items:center; justify-content: space-between;
+  padding: 14px 0; border-bottom: 1px solid var(--rule);
+  margin-bottom: 28px;
 }
-.meta-top { color: var(--muted); font-size: 12px; letter-spacing: 0.04em; text-transform: uppercase; font-weight: 600; }
+.brand { display:flex; align-items:center; gap: 10px; }
+.brand-mark {
+  width: 26px; height: 26px; background: var(--ink); border-radius: 2px;
+  display:flex; align-items:center; justify-content:center;
+  color: var(--lime); font-family: var(--display); font-style: italic; font-size: 18px; line-height: 1;
+}
+.brand-word { font-family: var(--display); font-size: 22px; line-height: 1; letter-spacing: -0.02em; }
+.brand-word em { font-style: italic; color: var(--rust); }
+.top-meta { font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-mute); }
+
+/* hero strip */
+.hero-strip {
+  display:flex; justify-content: space-between; align-items: baseline;
+  border-bottom: 1px solid var(--rule); padding-bottom: 12px; margin-bottom: 22px;
+}
+.hero-strip .mono { font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-mute); }
 
 .hero {
-  position: relative;
-  display: grid; grid-template-columns: 200px 1fr; gap: 28px; align-items: center;
-  padding: 22px 28px;
-  background: linear-gradient(135deg, var(--hero-from) 0%, var(--hero-via) 55%, var(--hero-to) 100%);
-  color: #f8fafc;
-  border-radius: 24px;
-  box-shadow: 0 30px 60px -20px rgba(20, 12, 60, 0.45), 0 2px 4px rgba(15,23,42,0.06);
-  overflow: hidden;
-  isolation: isolate;
+  display: grid; grid-template-columns: 1fr 280px; gap: 36px; align-items: end;
+  padding-bottom: 24px; border-bottom: 2px solid var(--ink); margin-bottom: 32px;
 }
-.hero::before {
-  content: ""; position:absolute; inset:0; pointer-events:none;
-  background:
-    radial-gradient(600px 240px at 90% 0%, rgba(124,58,237,0.45), transparent 60%),
-    radial-gradient(500px 240px at 0% 100%, rgba(6,182,212,0.18), transparent 60%);
-  z-index: -1;
+.hero h1 {
+  font-family: var(--display); font-size: clamp(48px, 8vw, 96px);
+  line-height: 0.92; letter-spacing: -0.03em; margin: 0; font-weight: 400;
 }
-.hero::after {
-  content:""; position:absolute; inset:0; pointer-events:none;
-  background-image: linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px);
-  background-size: 32px 32px; mask-image: radial-gradient(closest-side at 70% 50%, #000, transparent 80%);
-  z-index: -1; opacity: 0.5;
+.hero h1 .it { font-style: italic; color: var(--ink); }
+.hero h1 .accent { color: var(--rust); font-style: italic; }
+.hero-url { font-family: var(--mono); font-size: 13px; color: var(--ink-soft); margin-top: 14px; word-break: break-all; }
+.hero-side { text-align: right; }
+.score-num {
+  font-family: var(--display); font-style: italic; font-size: 140px; line-height: 0.85;
+  letter-spacing: -0.05em; color: var(--ink);
 }
-.hero-eyebrow { font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: rgba(255,255,255,0.65); font-weight: 600; margin-bottom: 8px; }
-.hero-meta h1 { font-size: 22px; margin: 0 0 4px; letter-spacing: -0.02em; font-weight: 700; line-height: 1.15; }
-.hero-meta .url { color: rgba(255,255,255,0.7); font-size: 14px; word-break: break-all; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
-.hero-grade-row { display:flex; gap: 8px; align-items:center; margin-top: 10px; flex-wrap: wrap; }
-.grade-chip { font-weight: 700; padding: 6px 12px; border-radius: 999px; font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.16); color: #fff; }
-.grade-chip strong { color: #fff; }
-.hero-stats { display:grid; grid-template-columns: repeat(5, minmax(0,1fr)); gap: 8px; margin-top: 14px; }
-.stat { background: rgba(255,255,255,0.06); backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.08); padding: 8px 10px; border-radius: 10px; }
-.stat-num { display:block; font-size: 18px; font-weight: 700; color: #ffffff; line-height: 1.1; letter-spacing: -0.02em; }
-.stat-label { display:block; font-size: 10px; color: rgba(255,255,255,0.65); margin-top: 2px; letter-spacing: 0.06em; text-transform: uppercase; font-weight: 600; }
+.score-meta { font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-mute); margin-top: 4px; }
+.grade-line { margin-top: 18px; display:flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
 
-.section { margin-top: 18px; }
-.section h2 { font-size: 15px; margin: 0 0 4px; display:flex; align-items:center; gap: 8px; letter-spacing: -0.01em; font-weight: 700; }
-.section-count { background:#ede9fe; color: var(--accent); border-radius: 999px; padding: 2px 10px; font-size: 12px; font-weight: 700; }
-.section-intro { color: var(--muted); font-size: 12px; margin: 0 0 10px; }
+/* chips */
+.chip {
+  font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.1em; text-transform: uppercase;
+  padding: 4px 10px; border-radius: 2px;
+  background: var(--paper); border: 1px solid var(--rule-soft); color: var(--ink-soft); font-weight: 500;
+}
+.chip strong { margin-left: 6px; color: var(--ink); font-weight: 600; }
+.chip-ink { background: var(--ink); color: var(--cream); border-color: var(--ink); }
+.chip-ink strong { color: var(--lime); }
+.chip-lime { background: var(--lime); color: var(--ink); border-color: var(--ink); }
 
-.card {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 12px 16px;
-  box-shadow: 0 1px 2px rgba(11,16,32,0.04), 0 6px 24px -12px rgba(11,16,32,0.08);
-}
-.issue-card { transition: transform 0.15s ease, box-shadow 0.15s ease; }
-.issue-card + .issue-card { margin-top: 8px; }
-.issue-header { display:flex; gap: 12px; align-items:center; }
-.issue-title { display:flex; flex-wrap: wrap; align-items: center; gap: 8px; flex: 1 1 auto; min-width: 0; }
-.issue-rank {
-  width: 28px; height: 28px; border-radius: 8px;
-  background: linear-gradient(135deg, #1f1147, #4f46e5);
-  color:#fff; display:flex; align-items:center; justify-content:center;
-  font-weight:700; font-size: 11px; flex-shrink:0;
-  box-shadow: 0 4px 10px -4px rgba(79,70,229,0.55);
-}
-.issue-title h3 { margin: 0; font-size: 14px; letter-spacing: -0.01em; font-weight: 700; }
-.issue-meta { display:flex; gap: 5px; flex-wrap: wrap; align-items:center; }
-.issue-meta { display:flex; gap: 6px; flex-wrap: wrap; align-items:center; }
-.badge { display:inline-flex; align-items:center; font-size: 11px; font-weight: 700; padding: 4px 9px; border-radius: 999px; border: 1px solid; letter-spacing: 0.02em; }
-.meta-pill { font-size: 11px; color: var(--muted); background:#f1f3fa; padding: 4px 9px; border-radius: 999px; font-weight: 600; border: 1px solid var(--border); }
-.issue-impact, .issue-suggestion { font-size: 14px; margin: 12px 0 0; color: #1e2240; }
-.issue-impact strong, .issue-suggestion strong { color: var(--text); }
-.issue-code { margin-top: 14px; }
-.issue-code summary { cursor: pointer; font-size: 13px; color: var(--accent); font-weight: 700; }
-.code-grid { display:grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 10px; }
-.code-label { font-size: 10.5px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 6px; font-weight: 700; }
-pre {
-  background:#0b1020; color: #e3e7f5; padding: 14px; border-radius: 12px; overflow:auto;
-  font-size: 12.5px; margin: 0;
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  border: 1px solid #1a2040;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
-}
-.issue-link { display:inline-block; margin-top: 14px; font-size: 13px; color: var(--accent); text-decoration: none; font-weight: 700; }
-.issue-hint { margin-left: auto; flex-shrink: 0; }
-.visual-hint { display:flex; align-items:center; gap: 8px; padding: 6px 10px; border-radius: 12px; background: #f1f3fa; border: 1px solid var(--border); }
-.swatch { display:inline-flex; align-items:center; justify-content:center; width: 44px; height: 28px; border-radius: 6px; font-weight: 700; font-size: 13px; }
-.swatch-bad { background: #ffffff; color: #cbd5e1; border: 1px solid #e2e8f0; }
-.swatch-good { background: #0b1020; color: #ffffff; }
-.swatch-arrow { color: var(--muted); font-weight: 700; font-size: 14px; }
-.target-dot { display:inline-block; border-radius: 50%; background: var(--accent); opacity: 0.8; }
-.target-dot.small { width: 12px; height: 12px; }
-.target-dot.big { width: 26px; height: 26px; }
-.hint-label { font-size: 11px; color: var(--muted); font-weight: 600; }
-.link-sample { font-size: 13px; color: var(--accent); text-decoration: underline; font-weight: 600; }
-.issue-suggestion-compact { font-size: 13.5px; color: #1e2240; margin: 10px 0 12px; }
-.link-arrow { display:inline-block; margin-left: 4px; transition: transform 0.15s ease; }
-details[open] .link-arrow { transform: rotate(90deg); }
-.issue-code summary { list-style: none; }
-.issue-code summary::-webkit-details-marker { display: none; }
-.issue-code summary { display:inline-flex; align-items:center; padding: 3px 9px; border-radius: 999px; background:#ede9fe; color: var(--accent); font-size: 11px; margin-top: 6px; }
+.sev-bar { margin-top: 20px; }
+.sev-bar svg { display:block; }
+.legend { display:flex; gap: 14px; flex-wrap: wrap; margin-top: 8px; font-family: var(--mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-mute); }
+.legend-dot { display:inline-block; width: 8px; height: 8px; margin-right: 6px; vertical-align: middle; border-radius: 1px; }
+.legend strong { color: var(--ink); margin-left: 4px; }
+.empty-bar { font-family: var(--mono); font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-mute); }
 
+/* sections */
+.block { padding-top: 28px; }
+.block-head { display:flex; align-items: baseline; gap: 18px; margin-bottom: 12px; }
+.block-num { font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--rust); }
+.block-num strong { color: var(--ink); font-family: var(--display); font-style: italic; font-size: 22px; margin-left: 4px; }
+.block h2 { font-family: var(--display); font-size: clamp(28px, 4vw, 42px); line-height: 1; letter-spacing: -0.02em; font-weight: 400; margin: 0; }
+.block h2 em { color: var(--rust); font-style: italic; }
+.block-sub { font-family: var(--display); font-size: 17px; color: var(--ink-soft); margin: 6px 0 22px; max-width: 60ch; }
+
+/* issues */
+.issues { border-top: 1px solid var(--rule); }
+.issue { display:grid; grid-template-columns: 70px 1fr auto; gap: 22px; padding: 18px 0; border-bottom: 1px solid var(--rule-soft); align-items: center; }
+.issue-num { font-family: var(--display); font-style: italic; font-size: 44px; line-height: 1; color: var(--ink); }
+.issue-title { font-family: var(--display); font-size: 22px; line-height: 1.2; margin: 0; font-weight: 400; }
+.issue-meta { display:flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; font-family: var(--mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; }
+.tag { padding: 3px 8px; border-radius: 2px; font-weight: 600; }
+.tag-critical { background: var(--rust); color: var(--paper); }
+.tag-serious  { background: #c66a2a; color: var(--paper); }
+.tag-moderate { background: #d6a51c; color: var(--ink); }
+.tag-minor    { background: #a3b428; color: var(--ink); }
+.tag-wcag { background: var(--paper); border: 1px solid var(--rule-soft); color: var(--ink-soft); }
+.tag-count { background: transparent; color: var(--ink-mute); padding-left: 0; }
+.tag-auto { background: var(--lime); color: var(--ink); }
+
+.issue-aside { text-align: right; min-width: 120px; }
+.hint { display:inline-flex; align-items:center; gap: 8px; padding: 6px 10px; border: 1px solid var(--rule); border-radius: 2px; background: var(--paper); }
+.sw { display:inline-flex; align-items:center; justify-content:center; width: 36px; height: 24px; border-radius: 2px; font-family: var(--display); font-weight: 400; font-size: 14px; }
+.sw-bad  { background: var(--paper); color: var(--ink-faint); border: 1px solid var(--rule-soft); }
+.sw-good { background: var(--ink); color: var(--lime); }
+.sw-arrow { color: var(--ink-mute); font-family: var(--mono); font-size: 12px; }
+.dot { display:inline-block; background: var(--rust); border-radius: 50%; }
+.dot-sm { width: 10px; height: 10px; }
+.dot-lg { width: 24px; height: 24px; }
+.lk-sample { font-family: var(--display); font-style: italic; text-decoration: underline; color: var(--rust); font-size: 14px; }
+
+/* incomplete */
 .incomplete-grid { display:grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; }
-.incomplete-card { background: linear-gradient(180deg, #fffbf2 0%, #ffffff 100%); border-color: #fde68a; }
-.incomplete-card h4 { margin: 0 0 6px; font-size: 14.5px; color:#854d0e; font-weight: 700; }
-.incomplete-card p { margin: 0 0 10px; font-size: 13px; color: #44391a; }
-.selectors { display:block; margin-top: 8px; font-size: 11px; color: #6b5e2a; word-break: break-all; background:#fef9c3; padding: 7px 9px; border-radius: 8px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+.incomplete { padding: 16px; background: var(--paper); border: 1px solid var(--rule); border-radius: 2px; }
+.incomplete-rule { font-family: var(--mono); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--rust); }
+.incomplete-help { font-family: var(--display); font-size: 16px; line-height: 1.4; margin: 8px 0 12px; }
+.incomplete-meta { font-family: var(--mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-mute); }
+.incomplete-meta a { color: var(--rust); }
+.incomplete-sel { display:block; margin-top: 8px; font-family: var(--mono); font-size: 10px; color: var(--ink-mute); word-break: break-all; }
 
-.empty-bar { color: rgba(255,255,255,0.6); font-size: 13px; padding: 8px 0; }
-.sev-bar-wrap { margin-top: 16px; }
-.sev-bar-wrap svg { border-radius: 999px; overflow: hidden; }
-.legend { display:flex; gap: 14px; flex-wrap: wrap; margin-top: 10px; font-size: 12px; color: rgba(255,255,255,0.78); font-weight: 600; }
-.legend-dot { display:inline-block; width:9px; height:9px; border-radius:3px; margin-right: 6px; vertical-align: middle; }
+/* tables (repo/crawl) */
+.tbl { width:100%; border-collapse: collapse; border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule); }
+.tbl th, .tbl td { text-align: left; padding: 10px 12px; font-size: 13.5px; border-bottom: 1px solid var(--rule-soft); }
+.tbl th { font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--rust); background: var(--paper); }
+.tbl tr:last-child td { border-bottom: none; }
+.tbl code { font-family: var(--mono); font-size: 12px; color: var(--ink); }
 
-.quick-wins {
-  background: linear-gradient(135deg, #ecfdf5 0%, #f0fdfa 100%);
-  border-color: #a7f3d0;
+/* footer */
+.foot { margin-top: 36px; padding: 22px 24px; background: var(--ink); color: var(--cream); border-radius: 2px;
+  display:flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; align-items: center;
+  font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.14em; text-transform: uppercase;
 }
-.quick-wins h3 { margin: 0 0 10px; font-size: 16px; color:#065f46; display:flex; align-items:center; gap:8px; font-weight: 700; }
-.quick-wins .qw-icon { width: 20px; height: 20px; border-radius: 6px; background: #10b981; color:#fff; display:inline-flex; align-items:center; justify-content:center; font-size: 13px; font-weight: 800; }
-.quick-wins ul { margin: 0; padding-left: 18px; font-size: 14px; color: #047857; }
-.quick-wins ul li { margin-bottom: 4px; }
-
-.footer {
-  margin-top: 18px; padding: 12px 16px; border-top: 1px solid var(--border);
-  background: linear-gradient(180deg, transparent, rgba(124,58,237,0.04));
-  border-radius: 16px;
-  font-size: 12px; color: var(--muted);
-  display:flex; gap: 16px; flex-wrap: wrap; justify-content: space-between; align-items:center;
-}
-.footer a { color: var(--accent); font-weight: 600; text-decoration: none; }
-.footer .stack-badges { display:flex; gap: 6px; flex-wrap: wrap; }
-
-.page-table { width: 100%; border-collapse: collapse; background: var(--card); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; }
-.page-table th, .page-table td { text-align: left; padding: 12px 14px; font-size: 13px; border-bottom: 1px solid var(--border); }
-.page-table th { background:#f8f9fd; font-weight: 700; color: #2a2e44; text-transform: uppercase; font-size: 11px; letter-spacing: 0.08em; }
-.page-table tr:last-child td { border-bottom: none; }
-.score-pill { font-weight: 700; padding: 3px 10px; border-radius: 999px; color: #fff; font-size: 12px; }
+.foot a { color: var(--lime); text-decoration: underline; }
+.foot-word { font-family: var(--display); font-style: italic; font-size: 28px; letter-spacing: -0.02em; color: var(--cream); text-transform: none; letter-spacing: -0.01em; }
+.foot-word .accent { color: var(--lime); }
 
 @media (max-width: 720px) {
-  .hero { grid-template-columns: 1fr; text-align: center; padding: 28px 22px; }
-  .hero-stats { grid-template-columns: repeat(2, 1fr); }
-  .code-grid { grid-template-columns: 1fr; }
+  .hero { grid-template-columns: 1fr; align-items: start; }
+  .hero-side { text-align: left; }
+  .grade-line { justify-content: flex-start; }
+  .score-num { font-size: 96px; }
+  .issue { grid-template-columns: 50px 1fr; }
+  .issue-aside { grid-column: 1 / -1; text-align: left; }
 }
 </style>
 </head>
 <body>
-<div class="container">
-  <div class="topbar">
-    <div class="brand"><span class="brand-mark"></span>Loop11y</div>
-    <div class="meta-top">Accessibility · WCAG 2.2</div>
+<div class="page">
+  <div class="top">
+    <div class="brand"><span class="brand-mark">L</span><span class="brand-word">Loop<em>11y</em></span></div>
+    <div class="top-meta">Issue №EJS00</div>
   </div>
   
+<section class="hero-strip">
+  <span class="mono">Accessibility Audit · Issue 2026-05-19</span>
+  <span class="mono">Tue, 19 May 2026 09:00:00 · UTC</span>
+</section>
+
 <section class="hero">
   <div>
-<svg width="180" height="180" viewBox="0 0 180 180" role="img" aria-label="Score 62 out of 100, grade C" class="gauge">
-  <defs>
-    <linearGradient id="gaugeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#ca8a04" stop-opacity="0.9" />
-      <stop offset="100%" stop-color="#ca8a04" stop-opacity="1" />
-    </linearGradient>
-    <filter id="gaugeGlow" x="-20%" y="-20%" width="140%" height="140%">
-      <feGaussianBlur stdDeviation="4" result="b"/>
-      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
-    </filter>
-  </defs>
-  <circle cx="90" cy="90" r="70" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="13" />
-  <circle cx="90" cy="90" r="70" fill="none" stroke="url(#gaugeGrad)" stroke-width="13"
-    stroke-linecap="round" stroke-dasharray="439.822971502571" stroke-dashoffset="167.132729170977"
-    transform="rotate(-90 90 90)" filter="url(#gaugeGlow)" />
-  <text x="90" y="96" text-anchor="middle" font-size="44" font-weight="800" fill="#ffffff" font-family="ui-sans-serif, system-ui, -apple-system, sans-serif" letter-spacing="-0.03em">62</text>
-  <text x="90" y="118" text-anchor="middle" font-size="11" fill="rgba(255,255,255,0.7)" font-family="ui-sans-serif, system-ui, -apple-system, sans-serif" letter-spacing="0.12em">SCORE / 100</text>
-</svg></div>
-  <div class="hero-meta">
-    <div class="hero-eyebrow">Accessibility report</div>
-    <h1>example-shop.test</h1>
-    <div class="url">https://example-shop.test</div>
-    <div class="hero-grade-row">
-      <span class="grade-chip">Grade <strong>C</strong></span>
-      <span class="grade-chip">WCAG <strong>Non-compliant</strong></span>
-      <span class="grade-chip">14 violations</span>
-      <span class="grade-chip">73 passing</span>
-      <span class="grade-chip">5 auto-fixable</span>
+    <h1><span class="it">A report for</span><br/><span class="accent">example-shop.test.</span></h1>
+    <div class="hero-url">https://example-shop.test</div>
+  </div>
+  <div class="hero-side">
+    <div class="score-num" style="color:#d6a51c">62</div>
+    <div class="score-meta">Score / 100 · Grade C</div>
+    <div class="grade-line">
+      <span class="chip chip-ink">WCAG<strong>Non-compliant</strong></span>
+      <span class="chip">14 violations</span>
+      <span class="chip">73 passing</span>
+      <span class="chip chip-lime">5 auto-fix</span>
     </div>
     
-<div class="sev-bar-wrap">
-  <svg width="100%" viewBox="0 0 600 28" preserveAspectRatio="none" role="img" aria-label="Violation severity distribution">
-    <rect x="0" y="0" width="128.57142857142856" height="28" fill="#dc2626"><title>Critical: 3</title></rect><rect x="128.57142857142856" y="0" width="257.1428571428571" height="28" fill="#ea580c"><title>Serious: 6</title></rect><rect x="385.71428571428567" y="0" width="171.42857142857142" height="28" fill="#ca8a04"><title>Moderate: 4</title></rect><rect x="557.1428571428571" y="0" width="42.857142857142854" height="28" fill="#65a30d"><title>Minor: 1</title></rect>
-  </svg>
-  <div class="legend"><span class="legend-chip"><span class="legend-dot" style="background:#dc2626"></span>Critical <strong>3</strong></span><span class="legend-chip"><span class="legend-dot" style="background:#ea580c"></span>Serious <strong>6</strong></span><span class="legend-chip"><span class="legend-dot" style="background:#ca8a04"></span>Moderate <strong>4</strong></span><span class="legend-chip"><span class="legend-dot" style="background:#65a30d"></span>Minor <strong>1</strong></span></div>
+<div class="sev-bar">
+  <svg width="100%" viewBox="0 0 600 14" preserveAspectRatio="none" aria-label="Violation severity distribution"><rect x="0" y="0" width="128.57142857142856" height="14" fill="#b34a30"><title>Critical: 3</title></rect><rect x="128.57142857142856" y="0" width="257.1428571428571" height="14" fill="#c66a2a"><title>Serious: 6</title></rect><rect x="385.71428571428567" y="0" width="171.42857142857142" height="14" fill="#b8932a"><title>Moderate: 4</title></rect><rect x="557.1428571428571" y="0" width="42.857142857142854" height="14" fill="#687a1a"><title>Minor: 1</title></rect></svg>
+  <div class="legend"><span class="legend-chip"><span class="legend-dot" style="background:#b34a30"></span>Critical <strong>3</strong></span><span class="legend-chip"><span class="legend-dot" style="background:#c66a2a"></span>Serious <strong>6</strong></span><span class="legend-chip"><span class="legend-dot" style="background:#b8932a"></span>Moderate <strong>4</strong></span><span class="legend-chip"><span class="legend-dot" style="background:#687a1a"></span>Minor <strong>1</strong></span></div>
 </div>
   </div>
 </section>
 
 
-<section class="section">
-  <h2>Top issues to fix <span class="section-count">5</span></h2>
-  <p class="section-intro">Visible-first: contrast, theme, font, and tap targets ranked before semantic-only failures.</p>
-  
-<article class="card issue-card">
-  <header class="issue-header">
-    <div class="issue-rank" style="background:linear-gradient(135deg, #7c3aed, #4f46e5);">#1</div>
-    <div class="issue-title">
-      <h3>23 elements have insufficient colour contrast</h3>
-      <span class="badge" style="background:#ea580c1a;color:#ea580c;border-color:#ea580c40">SERIOUS</span>
-      <span class="badge" style="background:#2563eb1a;color:#2563eb;border-color:#2563eb40">WCAG 1.4.3</span>
-      <span class="meta-pill">23 el</span>
+<section class="block">
+  <div class="block-head">
+    <span class="block-num">Ch.<strong>01</strong></span>
+    <h2>Top issues, <em>visible-first.</em></h2>
+  </div>
+  <p class="block-sub">Contrast, theme, font, and tap-target failures are what your users notice first — we rank them above semantic-only rules.</p>
+  <div class="issues">
+    
+<article class="issue">
+  <div class="issue-num">№1</div>
+  <div class="issue-body">
+    <h3 class="issue-title">23 elements have insufficient colour contrast</h3>
+    <div class="issue-meta">
+      <span class="tag tag-serious">SERIOUS</span>
+      <span class="tag tag-wcag">WCAG 1.4.3</span>
+      <span class="tag tag-count">23 el</span>
       
     </div>
-    <div class="issue-hint">
-<div class="visual-hint contrast-hint">
-  <span class="swatch swatch-bad" title="Fails contrast"><span class="swatch-fg">Aa</span></span>
-  <span class="swatch-arrow">→</span>
-  <span class="swatch swatch-good" title="Passes contrast"><span class="swatch-fg">Aa</span></span>
-</div></div>
-  </header>
+  </div>
+  <div class="issue-aside"><span class="hint"><span class="sw sw-bad">Aa</span><span class="sw-arrow">→</span><span class="sw sw-good">Aa</span></span></div>
 </article>
-<article class="card issue-card">
-  <header class="issue-header">
-    <div class="issue-rank" style="background:linear-gradient(135deg, #db2777, #7c3aed);">#2</div>
-    <div class="issue-title">
-      <h3>12 images are missing alternative text</h3>
-      <span class="badge" style="background:#dc26261a;color:#dc2626;border-color:#dc262640">CRITICAL</span>
-      <span class="badge" style="background:#2563eb1a;color:#2563eb;border-color:#2563eb40">WCAG 1.1.1</span>
-      <span class="meta-pill">12 el</span>
-      <span class="badge" style="background:#16a34a1a;color:#16a34a;border-color:#16a34a40">Auto-fix</span>
+<article class="issue">
+  <div class="issue-num">№2</div>
+  <div class="issue-body">
+    <h3 class="issue-title">12 images are missing alternative text</h3>
+    <div class="issue-meta">
+      <span class="tag tag-critical">CRITICAL</span>
+      <span class="tag tag-wcag">WCAG 1.1.1</span>
+      <span class="tag tag-count">12 el</span>
+      <span class="tag tag-auto">Auto-fix</span>
     </div>
-    
-  </header>
+  </div>
+  <div class="issue-aside"></div>
 </article>
-<article class="card issue-card">
-  <header class="issue-header">
-    <div class="issue-rank" style="background:linear-gradient(135deg, #f97316, #db2777);">#3</div>
-    <div class="issue-title">
-      <h3>5 buttons have no accessible name</h3>
-      <span class="badge" style="background:#dc26261a;color:#dc2626;border-color:#dc262640">CRITICAL</span>
-      <span class="badge" style="background:#2563eb1a;color:#2563eb;border-color:#2563eb40">WCAG 4.1.2</span>
-      <span class="meta-pill">5 el</span>
-      <span class="badge" style="background:#16a34a1a;color:#16a34a;border-color:#16a34a40">Auto-fix</span>
+<article class="issue">
+  <div class="issue-num">№3</div>
+  <div class="issue-body">
+    <h3 class="issue-title">5 buttons have no accessible name</h3>
+    <div class="issue-meta">
+      <span class="tag tag-critical">CRITICAL</span>
+      <span class="tag tag-wcag">WCAG 4.1.2</span>
+      <span class="tag tag-count">5 el</span>
+      <span class="tag tag-auto">Auto-fix</span>
     </div>
-    
-  </header>
+  </div>
+  <div class="issue-aside"></div>
 </article>
+  </div>
 </section>
 
 
-  <div class="footer">
-<div>Generated Tue, 19 May 2026 09:00:00 GMT · Viewport 1280×800 · axe-core 4.10.3</div>
-<div class="stack-badges"><span class="badge" style="background:#2563eb1a;color:#2563eb;border-color:#2563eb40">WCAG 2.2</span> <span class="badge" style="background:#2563eb1a;color:#2563eb;border-color:#2563eb40">EN 301 549</span> <span class="badge" style="background:#2563eb1a;color:#2563eb;border-color:#2563eb40">Section 508</span> <a href="https://github.com/tayyabataimur/loop11y" target="_blank" rel="noopener">loop11y →</a></div>
+<section class="block">
+  <div class="block-head">
+    <span class="block-num">Ch.<strong>02</strong></span>
+    <h2>Needs manual <em>review</em></h2>
+  </div>
+  <p class="block-sub">axe-core couldn't fully evaluate these. A human should verify. We tell you what the tool cannot decide — not the opposite.</p>
+  <div class="incomplete-grid">
+    
+    <article class="incomplete">
+      <div class="incomplete-rule">color-contrast</div>
+      <p class="incomplete-help">Elements must have sufficient color contrast</p>
+      <div class="incomplete-meta">2 nodes · <a href="https://dequeuniversity.com/rules/axe/4.10/color-contrast" target="_blank" rel="noopener">docs ↗</a></div>
+      <code class="incomplete-sel">main &gt; .promo-banner h2, footer .legal-text</code>
+    </article>
+    <article class="incomplete">
+      <div class="incomplete-rule">aria-valid-attr-value</div>
+      <p class="incomplete-help">ARIA attributes must conform to valid values</p>
+      <div class="incomplete-meta">1 node · <a href="https://dequeuniversity.com/rules/axe/4.10/aria-valid-attr-value" target="_blank" rel="noopener">docs ↗</a></div>
+      <code class="incomplete-sel">#mobile-nav-toggle</code>
+    </article>
+  </div>
+</section>
+
+  <div class="foot">
+<span>Generated Tue, 19 May 2026 09:00:00 · UTC · Viewport 1280×800 · axe-core 4.10.3</span>
+<span class="foot-word">Loop<span class="accent">11y</span></span>
+<span><a href="https://loop11y.tayyaba.dev" target="_blank" rel="noopener">loop11y.tayyaba.dev</a></span>
 </div>
 </div>
 </body>

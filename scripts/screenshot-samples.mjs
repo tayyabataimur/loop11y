@@ -10,8 +10,8 @@ const outDir = resolve(repoRoot, "docs");
 mkdirSync(outDir, { recursive: true });
 
 const targets = [
-  { html: "examples/sample-report.html", out: "docs/sample-report.jpg" },
-  { html: "examples/sample-diff-report.html", out: "docs/sample-diff-report.jpg" },
+  { html: "examples/sample-report.html", out: ["docs/sample-report.jpg", "web/public/sample-report.jpg"] },
+  { html: "examples/sample-diff-report.html", out: ["docs/sample-diff-report.jpg", "web/public/sample-diff-report.jpg"] },
 ];
 
 const browser = await chromium.launch({ headless: true });
@@ -30,10 +30,16 @@ for (const t of targets) {
     const container = document.querySelector(".container");
     return container ? container.getBoundingClientRect().height + 48 : document.documentElement.scrollHeight;
   });
-  await page.setViewportSize({ width: 1200, height: Math.min(Math.ceil(contentHeight), 1400) });
-  await page.screenshot({ path: resolve(repoRoot, t.out), fullPage: true, type: "jpeg", quality: 86 });
+  await page.setViewportSize({ width: 1200, height: Math.min(Math.ceil(contentHeight), 1600) });
+  const primary = t.out[0];
+  await page.screenshot({ path: resolve(repoRoot, primary), fullPage: true, type: "jpeg", quality: 86 });
+  for (const extra of t.out.slice(1)) {
+    const { copyFileSync, mkdirSync } = await import("node:fs");
+    mkdirSync(dirname(resolve(repoRoot, extra)), { recursive: true });
+    copyFileSync(resolve(repoRoot, primary), resolve(repoRoot, extra));
+  }
   await page.close();
-  console.log(`wrote ${t.out}`);
+  for (const p of t.out) console.log(`wrote ${p}`);
 }
 
 await context.close();
