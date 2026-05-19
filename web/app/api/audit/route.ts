@@ -17,9 +17,12 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "url is required" }, { status: 400 });
   }
 
+  const raw = body.url.trim();
+  const candidate = /^https?:\/\//i.test(raw) ? raw : `https://${raw}`;
+
   let parsed: URL;
   try {
-    parsed = new URL(body.url);
+    parsed = new URL(candidate);
     if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
       return NextResponse.json({ error: "Only http(s) URLs allowed" }, { status: 400 });
     }
