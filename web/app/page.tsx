@@ -2,7 +2,7 @@ import AuditForm from "./components/AuditForm";
 
 const GITHUB = "https://github.com/tayyabataimur/loop11y";
 const NPM = "https://www.npmjs.com/package/loop11y";
-const SKILL = "https://github.com/tayyabataimur/loop11y-skill";
+const SKILL = "https://www.skills.sh/tayyabataimur/loop11y-skill";
 const ISSUE_NO = "001";
 const ISSUE_DATE = "Spring 2026";
 

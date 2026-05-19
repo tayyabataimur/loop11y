@@ -32,7 +32,7 @@ Sample reports: [audit](https://htmlpreview.github.io/?https://github.com/tayyab
 | Surface | Command |
 |---|---|
 | CLI | `npm i -g loop11y` or `npx -y loop11y` |
-| Agent Skill (Claude Code, Cursor, Cline, Codex, [50+ others](https://skills.sh)) | `npx skills add tayyabataimur/loop11y-skill -g -a claude-code` |
+| [Agent Skill](https://www.skills.sh/tayyabataimur/loop11y-skill) (Claude Code, Cursor, Cline, Codex, [50+ others](https://skills.sh)) | `npx skills add tayyabataimur/loop11y-skill -g -a claude-code` |
 | MCP server (stdio) | add to client config (see below) |
 | MCP server (HTTP) | `LOOP11Y_PORT=3000 npx -y loop11y` |
 | GitHub Action | `uses: tayyabataimur/loop11y/action@v0.1.0` |
