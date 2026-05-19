@@ -39,19 +39,32 @@ function escapeHtml(input: string): string {
 }
 
 function scoreGaugeSvg(score: number, grade: string): string {
-  const radius = 70;
-  const stroke = 14;
+  const radius = 84;
+  const stroke = 16;
+  const size = 220;
+  const cx = size / 2;
   const circumference = 2 * Math.PI * radius;
-  const offset = circumference * (1 - Math.max(0, Math.min(100, score)) / 100);
-  const color = GRADE_COLOR[grade] ?? "#6b7280";
+  const pct = Math.max(0, Math.min(100, score)) / 100;
+  const offset = circumference * (1 - pct);
+  const color = GRADE_COLOR[grade] ?? "#94a3b8";
   return `
-<svg width="180" height="180" viewBox="0 0 180 180" role="img" aria-label="Score ${score} out of 100, grade ${grade}">
-  <circle cx="90" cy="90" r="${radius}" fill="none" stroke="#e5e7eb" stroke-width="${stroke}" />
-  <circle cx="90" cy="90" r="${radius}" fill="none" stroke="${color}" stroke-width="${stroke}"
+<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" role="img" aria-label="Score ${score} out of 100, grade ${grade}" class="gauge">
+  <defs>
+    <linearGradient id="gaugeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="${color}" stop-opacity="0.9" />
+      <stop offset="100%" stop-color="${color}" stop-opacity="1" />
+    </linearGradient>
+    <filter id="gaugeGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="4" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <circle cx="${cx}" cy="${cx}" r="${radius}" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="${stroke}" />
+  <circle cx="${cx}" cy="${cx}" r="${radius}" fill="none" stroke="url(#gaugeGrad)" stroke-width="${stroke}"
     stroke-linecap="round" stroke-dasharray="${circumference}" stroke-dashoffset="${offset}"
-    transform="rotate(-90 90 90)" />
-  <text x="90" y="92" text-anchor="middle" font-size="44" font-weight="700" fill="#111827" font-family="ui-sans-serif, system-ui, -apple-system, sans-serif">${score}</text>
-  <text x="90" y="118" text-anchor="middle" font-size="13" fill="#6b7280" font-family="ui-sans-serif, system-ui, -apple-system, sans-serif">Grade ${escapeHtml(grade)}</text>
+    transform="rotate(-90 ${cx} ${cx})" filter="url(#gaugeGlow)" />
+  <text x="${cx}" y="${cx + 6}" text-anchor="middle" font-size="56" font-weight="800" fill="#ffffff" font-family="ui-sans-serif, system-ui, -apple-system, sans-serif" letter-spacing="-0.03em">${score}</text>
+  <text x="${cx}" y="${cx + 32}" text-anchor="middle" font-size="13" fill="rgba(255,255,255,0.7)" font-family="ui-sans-serif, system-ui, -apple-system, sans-serif" letter-spacing="0.12em">SCORE / 100</text>
 </svg>`;
 }
 
@@ -162,71 +175,157 @@ function incompleteSection(items: IncompleteCheck[]): string {
 function baseStyles(): string {
   return `
 :root {
-  --bg: #f8fafc;
+  --bg: #f6f7fb;
   --card: #ffffff;
-  --border: #e5e7eb;
-  --text: #0f172a;
-  --muted: #64748b;
-  --accent: #6d28d9;
+  --border: #eaecf3;
+  --text: #0b1020;
+  --muted: #5d6478;
+  --accent: #7c3aed;
+  --accent-2: #4f46e5;
+  --hero-from: #0b0d17;
+  --hero-via: #1c1338;
+  --hero-to: #2a1265;
 }
 * { box-sizing: border-box; }
+html { -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
 body {
   margin: 0;
-  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  background: var(--bg);
+  font-family: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  background:
+    radial-gradient(1200px 600px at 80% -10%, rgba(124,58,237,0.10), transparent 60%),
+    radial-gradient(900px 500px at -10% 10%, rgba(79,70,229,0.08), transparent 60%),
+    var(--bg);
   color: var(--text);
   line-height: 1.55;
+  font-feature-settings: "ss01", "cv01", "cv11";
 }
-.container { max-width: 1080px; margin: 0 auto; padding: 32px 24px 80px; }
-.topbar { display: flex; align-items: center; justify-content: space-between; padding-bottom: 24px; border-bottom: 1px solid var(--border); margin-bottom: 32px; }
-.brand { font-weight: 700; font-size: 18px; letter-spacing: -0.01em; }
-.brand-dot { display:inline-block; width:10px; height:10px; border-radius:50%; background: var(--accent); margin-right: 8px; vertical-align: middle; }
-.meta-top { color: var(--muted); font-size: 13px; }
-.hero { display: grid; grid-template-columns: auto 1fr; gap: 32px; align-items: center; padding: 28px; background: var(--card); border: 1px solid var(--border); border-radius: 16px; box-shadow: 0 1px 2px rgba(15,23,42,0.04); }
-.hero-meta h1 { font-size: 22px; margin: 0 0 4px; letter-spacing: -0.01em; }
-.hero-meta .url { color: var(--muted); font-size: 14px; word-break: break-all; }
-.hero-stats { display:flex; gap: 20px; margin-top: 16px; flex-wrap: wrap; }
-.stat { background:#f1f5f9; padding:10px 14px; border-radius: 10px; font-size: 13px; }
-.stat strong { display: block; font-size: 18px; color: var(--text); }
-.section { margin-top: 40px; }
-.section h2 { font-size: 18px; margin: 0 0 6px; display:flex; align-items:center; gap: 10px; letter-spacing: -0.01em; }
-.section-count { background:#ede9fe; color: var(--accent); border-radius: 999px; padding: 2px 10px; font-size: 12px; font-weight: 600; }
+.container { max-width: 1120px; margin: 0 auto; padding: 28px 24px 80px; }
+
+.topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
+.brand { display:flex; align-items:center; gap: 10px; font-weight: 700; font-size: 16px; letter-spacing: -0.01em; color: var(--text); }
+.brand-mark {
+  width: 28px; height: 28px; border-radius: 8px;
+  background: conic-gradient(from 200deg at 50% 50%, #7c3aed, #4f46e5, #06b6d4, #7c3aed);
+  box-shadow: 0 4px 12px rgba(124,58,237,0.35), inset 0 0 0 1px rgba(255,255,255,0.4);
+}
+.meta-top { color: var(--muted); font-size: 12px; letter-spacing: 0.04em; text-transform: uppercase; font-weight: 600; }
+
+.hero {
+  position: relative;
+  display: grid; grid-template-columns: 240px 1fr; gap: 36px; align-items: center;
+  padding: 36px 36px 32px;
+  background: linear-gradient(135deg, var(--hero-from) 0%, var(--hero-via) 55%, var(--hero-to) 100%);
+  color: #f8fafc;
+  border-radius: 24px;
+  box-shadow: 0 30px 60px -20px rgba(20, 12, 60, 0.45), 0 2px 4px rgba(15,23,42,0.06);
+  overflow: hidden;
+  isolation: isolate;
+}
+.hero::before {
+  content: ""; position:absolute; inset:0; pointer-events:none;
+  background:
+    radial-gradient(600px 240px at 90% 0%, rgba(124,58,237,0.45), transparent 60%),
+    radial-gradient(500px 240px at 0% 100%, rgba(6,182,212,0.18), transparent 60%);
+  z-index: -1;
+}
+.hero::after {
+  content:""; position:absolute; inset:0; pointer-events:none;
+  background-image: linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px);
+  background-size: 32px 32px; mask-image: radial-gradient(closest-side at 70% 50%, #000, transparent 80%);
+  z-index: -1; opacity: 0.5;
+}
+.hero-eyebrow { font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: rgba(255,255,255,0.65); font-weight: 600; margin-bottom: 8px; }
+.hero-meta h1 { font-size: 28px; margin: 0 0 6px; letter-spacing: -0.02em; font-weight: 700; line-height: 1.15; }
+.hero-meta .url { color: rgba(255,255,255,0.7); font-size: 14px; word-break: break-all; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+.hero-grade-row { display:flex; gap: 14px; align-items:center; margin-top: 18px; flex-wrap: wrap; }
+.grade-chip { font-weight: 700; padding: 6px 12px; border-radius: 999px; font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.16); color: #fff; }
+.grade-chip strong { color: #fff; }
+.hero-stats { display:grid; grid-template-columns: repeat(5, minmax(0,1fr)); gap: 10px; margin-top: 22px; }
+.stat { background: rgba(255,255,255,0.06); backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.08); padding: 12px 14px; border-radius: 14px; }
+.stat-num { display:block; font-size: 22px; font-weight: 700; color: #ffffff; line-height: 1.1; letter-spacing: -0.02em; }
+.stat-label { display:block; font-size: 11px; color: rgba(255,255,255,0.65); margin-top: 4px; letter-spacing: 0.06em; text-transform: uppercase; font-weight: 600; }
+
+.section { margin-top: 36px; }
+.section h2 { font-size: 18px; margin: 0 0 6px; display:flex; align-items:center; gap: 10px; letter-spacing: -0.01em; font-weight: 700; }
+.section-count { background:#ede9fe; color: var(--accent); border-radius: 999px; padding: 2px 10px; font-size: 12px; font-weight: 700; }
 .section-intro { color: var(--muted); font-size: 14px; margin: 0 0 16px; }
-.card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 20px; box-shadow: 0 1px 2px rgba(15,23,42,0.03); }
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 22px;
+  box-shadow: 0 1px 2px rgba(11,16,32,0.04), 0 6px 24px -12px rgba(11,16,32,0.08);
+}
+.issue-card { transition: transform 0.15s ease, box-shadow 0.15s ease; }
 .issue-card + .issue-card { margin-top: 14px; }
 .issue-header { display:flex; gap: 14px; align-items:flex-start; }
-.issue-rank { background:#0f172a; color:#fff; width: 32px; height: 32px; border-radius: 8px; display:flex; align-items:center; justify-content:center; font-weight:700; font-size: 13px; flex-shrink:0; }
-.issue-title h3 { margin: 0 0 6px; font-size: 16px; letter-spacing: -0.01em; }
+.issue-rank {
+  width: 36px; height: 36px; border-radius: 10px;
+  background: linear-gradient(135deg, #1f1147, #4f46e5);
+  color:#fff; display:flex; align-items:center; justify-content:center;
+  font-weight:700; font-size: 13px; flex-shrink:0;
+  box-shadow: 0 6px 14px -6px rgba(79,70,229,0.6);
+}
+.issue-title h3 { margin: 0 0 8px; font-size: 16.5px; letter-spacing: -0.01em; font-weight: 700; }
 .issue-meta { display:flex; gap: 6px; flex-wrap: wrap; align-items:center; }
-.badge { display:inline-block; font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 999px; border: 1px solid; letter-spacing: 0.02em; text-transform: none; }
-.meta-pill { font-size: 12px; color: var(--muted); background:#f1f5f9; padding: 3px 8px; border-radius: 999px; }
-.issue-impact, .issue-suggestion { font-size: 14px; margin: 12px 0 0; color: #1e293b; }
+.badge { display:inline-flex; align-items:center; font-size: 11px; font-weight: 700; padding: 4px 9px; border-radius: 999px; border: 1px solid; letter-spacing: 0.02em; }
+.meta-pill { font-size: 11px; color: var(--muted); background:#f1f3fa; padding: 4px 9px; border-radius: 999px; font-weight: 600; border: 1px solid var(--border); }
+.issue-impact, .issue-suggestion { font-size: 14px; margin: 12px 0 0; color: #1e2240; }
+.issue-impact strong, .issue-suggestion strong { color: var(--text); }
 .issue-code { margin-top: 14px; }
-.issue-code summary { cursor: pointer; font-size: 13px; color: var(--accent); font-weight: 600; }
+.issue-code summary { cursor: pointer; font-size: 13px; color: var(--accent); font-weight: 700; }
 .code-grid { display:grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 10px; }
-.code-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 4px; }
-pre { background:#0f172a; color: #e2e8f0; padding: 12px; border-radius: 8px; overflow:auto; font-size: 12px; margin: 0; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
-.issue-link { display:inline-block; margin-top: 12px; font-size: 13px; color: var(--accent); text-decoration: none; font-weight: 600; }
+.code-label { font-size: 10.5px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 6px; font-weight: 700; }
+pre {
+  background:#0b1020; color: #e3e7f5; padding: 14px; border-radius: 12px; overflow:auto;
+  font-size: 12.5px; margin: 0;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  border: 1px solid #1a2040;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
+}
+.issue-link { display:inline-block; margin-top: 14px; font-size: 13px; color: var(--accent); text-decoration: none; font-weight: 700; }
+
 .incomplete-grid { display:grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; }
-.incomplete-card h4 { margin: 0 0 6px; font-size: 14px; }
-.incomplete-card p { margin: 0 0 10px; font-size: 13px; color: #334155; }
-.selectors { display:block; margin-top: 8px; font-size: 11px; color: var(--muted); word-break: break-all; background:#f1f5f9; padding: 6px 8px; border-radius: 6px; }
-.empty-bar { color: var(--muted); font-size: 14px; padding: 8px 0; }
-.sev-bar-wrap svg { border-radius: 6px; overflow: hidden; }
-.legend { display:flex; gap: 14px; flex-wrap: wrap; margin-top: 10px; font-size: 13px; color: #334155; }
-.legend-dot { display:inline-block; width:10px; height:10px; border-radius:3px; margin-right: 6px; vertical-align: middle; }
-.quick-wins { background: linear-gradient(135deg, #ecfdf5 0%, #f0fdf4 100%); border-color: #bbf7d0; }
-.quick-wins h3 { margin: 0 0 8px; font-size: 16px; color:#166534; }
-.quick-wins ul { margin: 0; padding-left: 18px; font-size: 14px; color: #15803d; }
-.footer { margin-top: 56px; padding-top: 24px; border-top: 1px solid var(--border); font-size: 12px; color: var(--muted); display:flex; gap: 16px; flex-wrap: wrap; justify-content: space-between; }
-.footer a { color: var(--muted); }
+.incomplete-card { background: linear-gradient(180deg, #fffbf2 0%, #ffffff 100%); border-color: #fde68a; }
+.incomplete-card h4 { margin: 0 0 6px; font-size: 14.5px; color:#854d0e; font-weight: 700; }
+.incomplete-card p { margin: 0 0 10px; font-size: 13px; color: #44391a; }
+.selectors { display:block; margin-top: 8px; font-size: 11px; color: #6b5e2a; word-break: break-all; background:#fef9c3; padding: 7px 9px; border-radius: 8px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+
+.empty-bar { color: rgba(255,255,255,0.6); font-size: 13px; padding: 8px 0; }
+.sev-bar-wrap { margin-top: 16px; }
+.sev-bar-wrap svg { border-radius: 999px; overflow: hidden; }
+.legend { display:flex; gap: 14px; flex-wrap: wrap; margin-top: 10px; font-size: 12px; color: rgba(255,255,255,0.78); font-weight: 600; }
+.legend-dot { display:inline-block; width:9px; height:9px; border-radius:3px; margin-right: 6px; vertical-align: middle; }
+
+.quick-wins {
+  background: linear-gradient(135deg, #ecfdf5 0%, #f0fdfa 100%);
+  border-color: #a7f3d0;
+}
+.quick-wins h3 { margin: 0 0 10px; font-size: 16px; color:#065f46; display:flex; align-items:center; gap:8px; font-weight: 700; }
+.quick-wins .qw-icon { width: 20px; height: 20px; border-radius: 6px; background: #10b981; color:#fff; display:inline-flex; align-items:center; justify-content:center; font-size: 13px; font-weight: 800; }
+.quick-wins ul { margin: 0; padding-left: 18px; font-size: 14px; color: #047857; }
+.quick-wins ul li { margin-bottom: 4px; }
+
+.footer {
+  margin-top: 56px; padding: 22px 24px; border-top: 1px solid var(--border);
+  background: linear-gradient(180deg, transparent, rgba(124,58,237,0.04));
+  border-radius: 16px;
+  font-size: 12px; color: var(--muted);
+  display:flex; gap: 16px; flex-wrap: wrap; justify-content: space-between; align-items:center;
+}
+.footer a { color: var(--accent); font-weight: 600; text-decoration: none; }
+.footer .stack-badges { display:flex; gap: 6px; flex-wrap: wrap; }
+
 .page-table { width: 100%; border-collapse: collapse; background: var(--card); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; }
-.page-table th, .page-table td { text-align: left; padding: 10px 14px; font-size: 13px; border-bottom: 1px solid var(--border); }
-.page-table th { background:#f8fafc; font-weight: 600; color: #334155; }
+.page-table th, .page-table td { text-align: left; padding: 12px 14px; font-size: 13px; border-bottom: 1px solid var(--border); }
+.page-table th { background:#f8f9fd; font-weight: 700; color: #2a2e44; text-transform: uppercase; font-size: 11px; letter-spacing: 0.08em; }
 .page-table tr:last-child td { border-bottom: none; }
-.score-pill { font-weight: 700; padding: 2px 8px; border-radius: 6px; color: #fff; font-size: 12px; }
-@media (max-width: 640px) {
-  .hero { grid-template-columns: 1fr; text-align: center; }
+.score-pill { font-weight: 700; padding: 3px 10px; border-radius: 999px; color: #fff; font-size: 12px; }
+
+@media (max-width: 720px) {
+  .hero { grid-template-columns: 1fr; text-align: center; padding: 28px 22px; }
+  .hero-stats { grid-template-columns: repeat(2, 1fr); }
   .code-grid { grid-template-columns: 1fr; }
 }
 `;
@@ -244,8 +343,8 @@ function htmlShell(title: string, body: string, footer: string): string {
 <body>
 <div class="container">
   <div class="topbar">
-    <div class="brand"><span class="brand-dot"></span>Loop11y</div>
-    <div class="meta-top">${escapeHtml(title)}</div>
+    <div class="brand"><span class="brand-mark"></span>Loop11y</div>
+    <div class="meta-top">Accessibility · WCAG 2.2</div>
   </div>
   ${body}
   <div class="footer">${footer}</div>
@@ -264,7 +363,7 @@ function renderEvaluateHtml(result: EvaluateResult): string {
     ? `
 <section class="section">
   <article class="card quick-wins">
-    <h3>${result.quick_wins.length} quick win${result.quick_wins.length === 1 ? "" : "s"} — patch with one command</h3>
+    <h3><span class="qw-icon">✓</span>${result.quick_wins.length} quick win${result.quick_wins.length === 1 ? "" : "s"} — patch with one command</h3>
     <ul>${result.quick_wins.map((qw) => `<li><strong>${escapeHtml(qw.violation_id)}</strong> — ${escapeHtml(qw.headline)}</li>`).join("")}</ul>
   </article>
 </section>`
@@ -288,17 +387,22 @@ function renderEvaluateHtml(result: EvaluateResult): string {
 <section class="hero">
   <div>${gauge}</div>
   <div class="hero-meta">
-    <h1>Accessibility report</h1>
+    <div class="hero-eyebrow">Accessibility report</div>
+    <h1>${escapeHtml(new URL(result.url).hostname || result.url)}</h1>
     <div class="url">${escapeHtml(result.url)}</div>
-    <div style="margin-top:10px; font-size: 13px; color: var(--muted)">WCAG compliance: <strong style="color:var(--text)">${escapeHtml(result.wcag_level)}</strong></div>
-    <div class="hero-stats">
-      <div class="stat"><strong>${sev.violations}</strong>Violations</div>
-      <div class="stat"><strong>${sev.critical}</strong>Critical</div>
-      <div class="stat"><strong>${sev.serious}</strong>Serious</div>
-      <div class="stat"><strong>${sev.passed}</strong>Checks passed</div>
-      <div class="stat"><strong>${sev.incomplete}</strong>Needs review</div>
+    <div class="hero-grade-row">
+      <span class="grade-chip">Grade <strong>${escapeHtml(result.grade)}</strong></span>
+      <span class="grade-chip">WCAG <strong>${escapeHtml(result.wcag_level)}</strong></span>
+      <span class="grade-chip">${sev.auto_fixable_count} auto-fixable</span>
     </div>
-    <div style="margin-top: 18px;">${sevBar}</div>
+    <div class="hero-stats">
+      <div class="stat"><span class="stat-num">${sev.violations}</span><span class="stat-label">Violations</span></div>
+      <div class="stat"><span class="stat-num">${sev.critical}</span><span class="stat-label">Critical</span></div>
+      <div class="stat"><span class="stat-num">${sev.serious}</span><span class="stat-label">Serious</span></div>
+      <div class="stat"><span class="stat-num">${sev.passed}</span><span class="stat-label">Checks passed</span></div>
+      <div class="stat"><span class="stat-num">${sev.incomplete}</span><span class="stat-label">Needs review</span></div>
+    </div>
+    ${sevBar}
   </div>
 </section>
 ${quickWins}
@@ -307,8 +411,8 @@ ${incomplete}
 `;
 
   const footer = `
-<div>Generated ${escapeHtml(result.timestamp)} · Viewport ${result.viewport ? `${result.viewport.width}×${result.viewport.height}` : "default"} · axe-core ${escapeHtml(result.axe_version ?? "")}</div>
-<div>${badge("WCAG 2.2", "#2563eb")} ${badge("EN 301 549", "#2563eb")} ${badge("Section 508", "#2563eb")} <a href="https://github.com/tayyabataimur/loop11y" target="_blank" rel="noopener">loop11y</a></div>
+<div>Generated ${escapeHtml(new Date(result.timestamp).toUTCString())} · Viewport ${result.viewport ? `${result.viewport.width}×${result.viewport.height}` : "default"} · axe-core ${escapeHtml(result.axe_version ?? "")}</div>
+<div class="stack-badges">${badge("WCAG 2.2", "#2563eb")} ${badge("EN 301 549", "#2563eb")} ${badge("Section 508", "#2563eb")} <a href="https://github.com/tayyabataimur/loop11y" target="_blank" rel="noopener">loop11y →</a></div>
 `;
 
   return htmlShell(`Loop11y · ${result.url}`, body, footer);
@@ -329,15 +433,20 @@ function renderRepoHtml(result: RepoAuditResult): string {
     .join("");
   const body = `
 <section class="hero">
-  <div style="font-size: 56px; font-weight: 800; color: var(--accent);">${result.totalViolations}</div>
+  <div style="text-align:center;">
+    <div style="font-size: 88px; font-weight: 800; color:#fff; letter-spacing:-0.04em; line-height:1;">${result.totalViolations}</div>
+    <div style="margin-top:6px; font-size:12px; color:rgba(255,255,255,0.65); letter-spacing:0.12em; text-transform:uppercase; font-weight:600;">Violations</div>
+  </div>
   <div class="hero-meta">
-    <h1>Repository audit</h1>
+    <div class="hero-eyebrow">Repository audit</div>
+    <h1>${escapeHtml(result.root.split("/").pop() || result.root)}</h1>
     <div class="url">${escapeHtml(result.root)}</div>
     <div class="hero-stats">
-      <div class="stat"><strong>${result.filesScanned}</strong>Files scanned</div>
-      <div class="stat"><strong>${result.criticalViolations}</strong>Critical</div>
-      <div class="stat"><strong>${result.frameworks.join(", ") || "—"}</strong>Frameworks</div>
-      <div class="stat"><strong>${result.sourceMapping.mappedViolations}/${result.sourceMapping.totalViolationTypes}</strong>Source-mapped</div>
+      <div class="stat"><span class="stat-num">${result.filesScanned}</span><span class="stat-label">Files scanned</span></div>
+      <div class="stat"><span class="stat-num">${result.criticalViolations}</span><span class="stat-label">Critical</span></div>
+      <div class="stat"><span class="stat-num">${result.frameworks.length || "—"}</span><span class="stat-label">Frameworks</span></div>
+      <div class="stat"><span class="stat-num">${result.sourceMapping.mappedViolations}/${result.sourceMapping.totalViolationTypes}</span><span class="stat-label">Source-mapped</span></div>
+      <div class="stat"><span class="stat-num">${result.filesSkipped}</span><span class="stat-label">Skipped</span></div>
     </div>
   </div>
 </section>
@@ -369,15 +478,20 @@ function renderCrawlHtml(result: CrawlSiteResult): string {
     .join("");
   const body = `
 <section class="hero">
-  <div style="font-size: 56px; font-weight: 800; color: ${GRADE_COLOR[result.pageResults[0]?.grade ?? "F"] ?? "#6b7280"};">${result.averageScore}</div>
+  <div style="text-align:center;">
+    <div style="font-size: 88px; font-weight: 800; color:#fff; letter-spacing:-0.04em; line-height:1;">${result.averageScore}</div>
+    <div style="margin-top:6px; font-size:12px; color:rgba(255,255,255,0.65); letter-spacing:0.12em; text-transform:uppercase; font-weight:600;">Avg score</div>
+  </div>
   <div class="hero-meta">
-    <h1>Site crawl report</h1>
+    <div class="hero-eyebrow">Site crawl</div>
+    <h1>${escapeHtml(new URL(result.origin).hostname)}</h1>
     <div class="url">${escapeHtml(result.origin)}</div>
     <div class="hero-stats">
-      <div class="stat"><strong>${result.pagesAudited}</strong>Pages audited</div>
-      <div class="stat"><strong>${result.pagesSkipped}</strong>Skipped</div>
-      <div class="stat"><strong>${result.lowestScore?.score ?? "—"}</strong>Lowest score</div>
-      <div class="stat"><strong>${result.highestScore?.score ?? "—"}</strong>Highest score</div>
+      <div class="stat"><span class="stat-num">${result.pagesAudited}</span><span class="stat-label">Pages audited</span></div>
+      <div class="stat"><span class="stat-num">${result.pagesSkipped}</span><span class="stat-label">Skipped</span></div>
+      <div class="stat"><span class="stat-num">${result.lowestScore?.score ?? "—"}</span><span class="stat-label">Lowest</span></div>
+      <div class="stat"><span class="stat-num">${result.highestScore?.score ?? "—"}</span><span class="stat-label">Highest</span></div>
+      <div class="stat"><span class="stat-num">${result.topViolations.length}</span><span class="stat-label">Rules hit</span></div>
     </div>
   </div>
 </section>
@@ -405,22 +519,29 @@ export function renderBeforeAfterHtml(before: EvaluateResult, after: EvaluateRes
   const deltaColor = delta >= 0 ? "#16a34a" : "#dc2626";
   const resolved = before.top_issues.filter((b) => !after.top_issues.some((a) => a.violation_id === b.violation_id));
   const introduced = after.top_issues.filter((a) => !before.top_issues.some((b) => b.violation_id === a.violation_id));
+  const stillPresent = after.top_issues.filter((a) => before.top_issues.some((b) => b.violation_id === a.violation_id));
 
   const body = `
 <section class="hero">
   <div style="text-align:center;">
-    <div style="font-size: 56px; font-weight: 800; color: ${deltaColor};">${delta >= 0 ? "+" : ""}${delta}</div>
-    <div style="color: var(--muted); font-size: 13px;">score delta</div>
+    <div style="font-size: 96px; font-weight: 800; color:${deltaColor}; letter-spacing:-0.05em; line-height:1; text-shadow: 0 0 32px ${deltaColor}66;">${delta >= 0 ? "+" : ""}${delta}</div>
+    <div style="margin-top:6px; font-size:12px; color:rgba(255,255,255,0.65); letter-spacing:0.12em; text-transform:uppercase; font-weight:600;">Score delta</div>
   </div>
   <div class="hero-meta">
-    <h1>Before → After</h1>
+    <div class="hero-eyebrow">Before → After</div>
+    <h1>${escapeHtml(new URL(after.url).hostname || after.url)}</h1>
     <div class="url">${escapeHtml(after.url)}</div>
+    <div class="hero-grade-row">
+      <span class="grade-chip">Score <strong>${before.score} → ${after.score}</strong></span>
+      <span class="grade-chip">Grade <strong>${before.grade} → ${after.grade}</strong></span>
+      <span class="grade-chip">${before.summary.violations} → ${after.summary.violations} violations</span>
+    </div>
     <div class="hero-stats">
-      <div class="stat"><strong>${before.score} → ${after.score}</strong>Score</div>
-      <div class="stat"><strong>${before.grade} → ${after.grade}</strong>Grade</div>
-      <div class="stat"><strong>${before.summary.violations} → ${after.summary.violations}</strong>Violations</div>
-      <div class="stat"><strong>${resolved.length}</strong>Resolved</div>
-      <div class="stat"><strong>${introduced.length}</strong>New</div>
+      <div class="stat"><span class="stat-num" style="color:#34d399;">${resolved.length}</span><span class="stat-label">Resolved</span></div>
+      <div class="stat"><span class="stat-num" style="color:#f87171;">${introduced.length}</span><span class="stat-label">New</span></div>
+      <div class="stat"><span class="stat-num">${stillPresent.length}</span><span class="stat-label">Still present</span></div>
+      <div class="stat"><span class="stat-num">${after.summary.passed}</span><span class="stat-label">Now passing</span></div>
+      <div class="stat"><span class="stat-num">${after.summary.incomplete}</span><span class="stat-label">Manual</span></div>
     </div>
   </div>
 </section>
@@ -433,10 +554,11 @@ ${introduced.length > 0 ? `
   <h2>Newly introduced <span class="section-count">${introduced.length}</span></h2>
   ${introduced.map(issueCard).join("")}
 </section>` : ""}
+${stillPresent.length > 0 ? `
 <section class="section">
-  <h2>Still present <span class="section-count">${after.top_issues.length}</span></h2>
-  ${after.top_issues.slice(0, 10).map(issueCard).join("")}
-</section>
+  <h2>Still present <span class="section-count">${stillPresent.length}</span></h2>
+  ${stillPresent.slice(0, 10).map(issueCard).join("")}
+</section>` : ""}
 `;
   const footer = `<div>Generated ${escapeHtml(after.timestamp)} · before ${escapeHtml(before.timestamp)}</div><div>${badge("WCAG 2.2", "#2563eb")} <a href="https://github.com/tayyabataimur/loop11y" target="_blank" rel="noopener">loop11y</a></div>`;
   return htmlShell(`Loop11y · diff · ${after.url}`, body, footer);

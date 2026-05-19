@@ -18,6 +18,7 @@
     "typecheck": "tsc --noEmit",
     "test:live": "node scripts/live-audit.mjs",
     "sample:report": "npm run build && node scripts/generate-sample-report.mjs",
+    "sample:screenshots": "npm run sample:report && node scripts/screenshot-samples.mjs",
     "prepublishOnly": "npm run build",
     "postinstall": "playwright install chromium --with-deps 2>/dev/null || true"
   },

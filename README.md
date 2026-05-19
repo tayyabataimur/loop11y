@@ -32,9 +32,19 @@ npx -y loop11y audit https://your-site.com --html --output report.html
 npx -y loop11y diff before.json after.json --output diff.html
 ```
 
-Single self-contained HTML — score gauge, severity bar, top-issue cards with WCAG badges, auto-fixable callouts, "needs human review" section, before/after diff. No JS runtime, share by email or commit to your repo.
+Self-contained HTML — score gauge, severity bar, top-issue cards with WCAG badges, auto-fixable callouts, "needs human review" section, and a side-by-side before/after diff. No JS runtime, share by email or commit to your repo.
 
-[**View sample report →**](https://htmlpreview.github.io/?https://github.com/tayyabataimur/loop11y/blob/main/examples/sample-report.html) · [**View before/after diff →**](https://htmlpreview.github.io/?https://github.com/tayyabataimur/loop11y/blob/main/examples/sample-diff-report.html)
+<a href="https://htmlpreview.github.io/?https://github.com/tayyabataimur/loop11y/blob/main/examples/sample-report.html">
+  <img src="docs/sample-report.jpg" alt="Loop11y accessibility report — score gauge, severity bar, ranked top issues with WCAG badges, quick wins callout, and a manual-review section" width="100%" />
+</a>
+
+<sub>↑ <strong>Sample audit report</strong> · <a href="https://htmlpreview.github.io/?https://github.com/tayyabataimur/loop11y/blob/main/examples/sample-report.html">open live</a> · <a href="https://htmlpreview.github.io/?https://github.com/tayyabataimur/loop11y/blob/main/examples/sample-diff-report.html">open before/after diff</a></sub>
+
+<a href="https://htmlpreview.github.io/?https://github.com/tayyabataimur/loop11y/blob/main/examples/sample-diff-report.html">
+  <img src="docs/sample-diff-report.jpg" alt="Loop11y before/after diff report — score delta, resolved issues, newly introduced issues, and still-present issues" width="100%" />
+</a>
+
+<sub>↑ <strong>Before / after diff</strong> — `loop11y diff before.json after.json --output diff.html`</sub>
 
 **Loop11y** is a universal accessibility layer for humans and AI agents.
 
