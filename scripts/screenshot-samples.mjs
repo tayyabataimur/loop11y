@@ -25,9 +25,12 @@ for (const t of targets) {
   const page = await context.newPage();
   const url = pathToFileURL(resolve(repoRoot, t.html)).toString();
   await page.goto(url, { waitUntil: "networkidle" });
-  await page.evaluate(() => {
-    document.querySelectorAll("details").forEach((d) => d.setAttribute("open", ""));
+  // Keep <details> closed for the compact marketing shot.
+  const contentHeight = await page.evaluate(() => {
+    const container = document.querySelector(".container");
+    return container ? container.getBoundingClientRect().height + 48 : document.documentElement.scrollHeight;
   });
+  await page.setViewportSize({ width: 1200, height: Math.min(Math.ceil(contentHeight), 1400) });
   await page.screenshot({ path: resolve(repoRoot, t.out), fullPage: true, type: "jpeg", quality: 86 });
   await page.close();
   console.log(`wrote ${t.out}`);

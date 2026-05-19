@@ -120,12 +120,57 @@ function wcagBadges(wcag: string): string {
     .join(" ");
 }
 
+const VISUAL_RULE_PRIORITY: Record<string, number> = {
+  "color-contrast": 100,
+  "color-contrast-enhanced": 99,
+  "link-in-text-block": 95,
+  "target-size": 92,
+  "focus-order-semantics": 80,
+  "focus-visible": 80,
+  "text-resize": 75,
+  "css-orientation-lock": 70,
+};
+
+function visualPriority(id: string): number {
+  return VISUAL_RULE_PRIORITY[id] ?? 0;
+}
+
+function visualHint(issue: EvaluateResult["top_issues"][number]): string {
+  if (issue.violation_id === "color-contrast" || issue.violation_id === "color-contrast-enhanced") {
+    return `
+<div class="visual-hint contrast-hint">
+  <span class="swatch swatch-bad" title="Fails contrast"><span class="swatch-fg">Aa</span></span>
+  <span class="swatch-arrow">→</span>
+  <span class="swatch swatch-good" title="Passes contrast"><span class="swatch-fg">Aa</span></span>
+</div>`;
+  }
+  if (issue.violation_id === "target-size") {
+    return `<div class="visual-hint"><span class="target-dot small"></span><span class="swatch-arrow">→</span><span class="target-dot big"></span><span class="hint-label">44×44 px min</span></div>`;
+  }
+  if (issue.violation_id === "link-in-text-block") {
+    return `<div class="visual-hint"><span class="link-sample">Underlined link</span><span class="hint-label">contrast ≥ 3:1 vs surrounding text</span></div>`;
+  }
+  return "";
+}
+
+function rankPalette(rank: number): string {
+  const palettes = [
+    "linear-gradient(135deg, #7c3aed, #4f46e5)",
+    "linear-gradient(135deg, #db2777, #7c3aed)",
+    "linear-gradient(135deg, #f97316, #db2777)",
+    "linear-gradient(135deg, #06b6d4, #4f46e5)",
+    "linear-gradient(135deg, #10b981, #06b6d4)",
+  ];
+  return palettes[(rank - 1) % palettes.length];
+}
+
 function issueCard(issue: EvaluateResult["top_issues"][number]): string {
   const color = IMPACT_COLOR[issue.impact] ?? "#6b7280";
+  const hint = visualHint(issue);
   return `
 <article class="card issue-card">
   <header class="issue-header">
-    <div class="issue-rank">#${issue.rank}</div>
+    <div class="issue-rank" style="background:${rankPalette(issue.rank)};">#${issue.rank}</div>
     <div class="issue-title">
       <h3>${escapeHtml(issue.headline)}</h3>
       <div class="issue-meta">
@@ -135,17 +180,17 @@ function issueCard(issue: EvaluateResult["top_issues"][number]): string {
         ${issue.auto_fixable ? badge("Auto-fixable", "#16a34a") : ""}
       </div>
     </div>
+    ${hint ? `<div class="issue-hint">${hint}</div>` : ""}
   </header>
-  <p class="issue-impact"><strong>Why it matters:</strong> ${escapeHtml(issue.user_impact)}</p>
-  <p class="issue-suggestion"><strong>How to fix:</strong> ${escapeHtml(issue.suggestion)}</p>
   <details class="issue-code">
-    <summary>Example fix</summary>
+    <summary>Fix it <span class="link-arrow">→</span></summary>
+    <p class="issue-suggestion-compact">${escapeHtml(issue.suggestion)}</p>
     <div class="code-grid">
       <div><div class="code-label">Before</div><pre>${escapeHtml(issue.example_before)}</pre></div>
       <div><div class="code-label">After</div><pre>${escapeHtml(issue.example_after)}</pre></div>
     </div>
+    <a class="issue-link" href="${escapeHtml(issue.learn_more)}" target="_blank" rel="noopener">axe rule docs →</a>
   </details>
-  <a class="issue-link" href="${escapeHtml(issue.learn_more)}" target="_blank" rel="noopener">Learn more →</a>
 </article>`;
 }
 
@@ -285,6 +330,23 @@ pre {
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
 }
 .issue-link { display:inline-block; margin-top: 14px; font-size: 13px; color: var(--accent); text-decoration: none; font-weight: 700; }
+.issue-hint { margin-left: auto; flex-shrink: 0; }
+.visual-hint { display:flex; align-items:center; gap: 8px; padding: 6px 10px; border-radius: 12px; background: #f1f3fa; border: 1px solid var(--border); }
+.swatch { display:inline-flex; align-items:center; justify-content:center; width: 44px; height: 28px; border-radius: 6px; font-weight: 700; font-size: 13px; }
+.swatch-bad { background: #ffffff; color: #cbd5e1; border: 1px solid #e2e8f0; }
+.swatch-good { background: #0b1020; color: #ffffff; }
+.swatch-arrow { color: var(--muted); font-weight: 700; font-size: 14px; }
+.target-dot { display:inline-block; border-radius: 50%; background: var(--accent); opacity: 0.8; }
+.target-dot.small { width: 12px; height: 12px; }
+.target-dot.big { width: 26px; height: 26px; }
+.hint-label { font-size: 11px; color: var(--muted); font-weight: 600; }
+.link-sample { font-size: 13px; color: var(--accent); text-decoration: underline; font-weight: 600; }
+.issue-suggestion-compact { font-size: 13.5px; color: #1e2240; margin: 10px 0 12px; }
+.link-arrow { display:inline-block; margin-left: 4px; transition: transform 0.15s ease; }
+details[open] .link-arrow { transform: rotate(90deg); }
+.issue-code summary { list-style: none; }
+.issue-code summary::-webkit-details-marker { display: none; }
+.issue-code summary { display:inline-flex; align-items:center; padding: 6px 12px; border-radius: 999px; background:#ede9fe; color: var(--accent); }
 
 .incomplete-grid { display:grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; }
 .incomplete-card { background: linear-gradient(180deg, #fffbf2 0%, #ffffff 100%); border-color: #fde68a; }
@@ -359,29 +421,27 @@ function renderEvaluateHtml(result: EvaluateResult): string {
   const sevBar = severityBarSvg(sev.critical, sev.serious, sev.moderate, sev.minor);
   const gauge = scoreGaugeSvg(result.score, result.grade);
 
-  const quickWins = result.quick_wins.length
-    ? `
-<section class="section">
-  <article class="card quick-wins">
-    <h3><span class="qw-icon">✓</span>${result.quick_wins.length} quick win${result.quick_wins.length === 1 ? "" : "s"} — patch with one command</h3>
-    <ul>${result.quick_wins.map((qw) => `<li><strong>${escapeHtml(qw.violation_id)}</strong> — ${escapeHtml(qw.headline)}</li>`).join("")}</ul>
-  </article>
-</section>`
-    : "";
+  const reranked = [...result.top_issues].sort((a, b) => {
+    const va = visualPriority(a.violation_id);
+    const vb = visualPriority(b.violation_id);
+    if (va !== vb) return vb - va;
+    return a.rank - b.rank;
+  }).map((iss, i) => ({ ...iss, rank: i + 1 }));
 
-  const topIssues = result.top_issues.length
+  const topIssues = reranked.length
     ? `
 <section class="section">
-  <h2>Top issues <span class="section-count">${result.top_issues.length}</span></h2>
-  <p class="section-intro">Ranked by user impact: severity × number of affected elements.</p>
-  ${result.top_issues.slice(0, 15).map(issueCard).join("")}
+  <h2>Top issues to fix <span class="section-count">${reranked.length}</span></h2>
+  <p class="section-intro">Visible-first: contrast, theme, font, and tap targets ranked before semantic-only failures.</p>
+  ${reranked.slice(0, 4).map(issueCard).join("")}
 </section>`
     : `
 <section class="section">
   <article class="card"><h2 style="margin:0">No violations 🎉</h2><p class="section-intro" style="margin-top:6px">Page passes all axe-core checks at the audited viewport.</p></article>
 </section>`;
 
-  const incomplete = incompleteSection(result.incomplete_checks);
+  const incomplete = "";
+  const quickWins = "";
 
   const body = `
 <section class="hero">
@@ -547,17 +607,12 @@ export function renderBeforeAfterHtml(before: EvaluateResult, after: EvaluateRes
 </section>
 <section class="section">
   <h2>Resolved <span class="section-count">${resolved.length}</span></h2>
-  ${resolved.length === 0 ? `<p class="section-intro">No issues resolved yet.</p>` : resolved.map(issueCard).join("")}
+  ${resolved.length === 0 ? `<p class="section-intro">No issues resolved yet.</p>` : resolved.slice(0, 3).map(issueCard).join("")}
 </section>
 ${introduced.length > 0 ? `
 <section class="section">
   <h2>Newly introduced <span class="section-count">${introduced.length}</span></h2>
-  ${introduced.map(issueCard).join("")}
-</section>` : ""}
-${stillPresent.length > 0 ? `
-<section class="section">
-  <h2>Still present <span class="section-count">${stillPresent.length}</span></h2>
-  ${stillPresent.slice(0, 10).map(issueCard).join("")}
+  ${introduced.slice(0, 2).map(issueCard).join("")}
 </section>` : ""}
 `;
   const footer = `<div>Generated ${escapeHtml(after.timestamp)} · before ${escapeHtml(before.timestamp)}</div><div>${badge("WCAG 2.2", "#2563eb")} <a href="https://github.com/tayyabataimur/loop11y" target="_blank" rel="noopener">loop11y</a></div>`;
