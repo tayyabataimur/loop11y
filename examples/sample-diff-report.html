@@ -1,0 +1,287 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Loop11y · diff · https://example-shop.test</title>
+<style>
+:root {
+  --bg: #f8fafc;
+  --card: #ffffff;
+  --border: #e5e7eb;
+  --text: #0f172a;
+  --muted: #64748b;
+  --accent: #6d28d9;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.55;
+}
+.container { max-width: 1080px; margin: 0 auto; padding: 32px 24px 80px; }
+.topbar { display: flex; align-items: center; justify-content: space-between; padding-bottom: 24px; border-bottom: 1px solid var(--border); margin-bottom: 32px; }
+.brand { font-weight: 700; font-size: 18px; letter-spacing: -0.01em; }
+.brand-dot { display:inline-block; width:10px; height:10px; border-radius:50%; background: var(--accent); margin-right: 8px; vertical-align: middle; }
+.meta-top { color: var(--muted); font-size: 13px; }
+.hero { display: grid; grid-template-columns: auto 1fr; gap: 32px; align-items: center; padding: 28px; background: var(--card); border: 1px solid var(--border); border-radius: 16px; box-shadow: 0 1px 2px rgba(15,23,42,0.04); }
+.hero-meta h1 { font-size: 22px; margin: 0 0 4px; letter-spacing: -0.01em; }
+.hero-meta .url { color: var(--muted); font-size: 14px; word-break: break-all; }
+.hero-stats { display:flex; gap: 20px; margin-top: 16px; flex-wrap: wrap; }
+.stat { background:#f1f5f9; padding:10px 14px; border-radius: 10px; font-size: 13px; }
+.stat strong { display: block; font-size: 18px; color: var(--text); }
+.section { margin-top: 40px; }
+.section h2 { font-size: 18px; margin: 0 0 6px; display:flex; align-items:center; gap: 10px; letter-spacing: -0.01em; }
+.section-count { background:#ede9fe; color: var(--accent); border-radius: 999px; padding: 2px 10px; font-size: 12px; font-weight: 600; }
+.section-intro { color: var(--muted); font-size: 14px; margin: 0 0 16px; }
+.card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 20px; box-shadow: 0 1px 2px rgba(15,23,42,0.03); }
+.issue-card + .issue-card { margin-top: 14px; }
+.issue-header { display:flex; gap: 14px; align-items:flex-start; }
+.issue-rank { background:#0f172a; color:#fff; width: 32px; height: 32px; border-radius: 8px; display:flex; align-items:center; justify-content:center; font-weight:700; font-size: 13px; flex-shrink:0; }
+.issue-title h3 { margin: 0 0 6px; font-size: 16px; letter-spacing: -0.01em; }
+.issue-meta { display:flex; gap: 6px; flex-wrap: wrap; align-items:center; }
+.badge { display:inline-block; font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 999px; border: 1px solid; letter-spacing: 0.02em; text-transform: none; }
+.meta-pill { font-size: 12px; color: var(--muted); background:#f1f5f9; padding: 3px 8px; border-radius: 999px; }
+.issue-impact, .issue-suggestion { font-size: 14px; margin: 12px 0 0; color: #1e293b; }
+.issue-code { margin-top: 14px; }
+.issue-code summary { cursor: pointer; font-size: 13px; color: var(--accent); font-weight: 600; }
+.code-grid { display:grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 10px; }
+.code-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 4px; }
+pre { background:#0f172a; color: #e2e8f0; padding: 12px; border-radius: 8px; overflow:auto; font-size: 12px; margin: 0; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+.issue-link { display:inline-block; margin-top: 12px; font-size: 13px; color: var(--accent); text-decoration: none; font-weight: 600; }
+.incomplete-grid { display:grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; }
+.incomplete-card h4 { margin: 0 0 6px; font-size: 14px; }
+.incomplete-card p { margin: 0 0 10px; font-size: 13px; color: #334155; }
+.selectors { display:block; margin-top: 8px; font-size: 11px; color: var(--muted); word-break: break-all; background:#f1f5f9; padding: 6px 8px; border-radius: 6px; }
+.empty-bar { color: var(--muted); font-size: 14px; padding: 8px 0; }
+.sev-bar-wrap svg { border-radius: 6px; overflow: hidden; }
+.legend { display:flex; gap: 14px; flex-wrap: wrap; margin-top: 10px; font-size: 13px; color: #334155; }
+.legend-dot { display:inline-block; width:10px; height:10px; border-radius:3px; margin-right: 6px; vertical-align: middle; }
+.quick-wins { background: linear-gradient(135deg, #ecfdf5 0%, #f0fdf4 100%); border-color: #bbf7d0; }
+.quick-wins h3 { margin: 0 0 8px; font-size: 16px; color:#166534; }
+.quick-wins ul { margin: 0; padding-left: 18px; font-size: 14px; color: #15803d; }
+.footer { margin-top: 56px; padding-top: 24px; border-top: 1px solid var(--border); font-size: 12px; color: var(--muted); display:flex; gap: 16px; flex-wrap: wrap; justify-content: space-between; }
+.footer a { color: var(--muted); }
+.page-table { width: 100%; border-collapse: collapse; background: var(--card); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; }
+.page-table th, .page-table td { text-align: left; padding: 10px 14px; font-size: 13px; border-bottom: 1px solid var(--border); }
+.page-table th { background:#f8fafc; font-weight: 600; color: #334155; }
+.page-table tr:last-child td { border-bottom: none; }
+.score-pill { font-weight: 700; padding: 2px 8px; border-radius: 6px; color: #fff; font-size: 12px; }
+@media (max-width: 640px) {
+  .hero { grid-template-columns: 1fr; text-align: center; }
+  .code-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="topbar">
+    <div class="brand"><span class="brand-dot"></span>Loop11y</div>
+    <div class="meta-top">Loop11y · diff · https://example-shop.test</div>
+  </div>
+  
+<section class="hero">
+  <div style="text-align:center;">
+    <div style="font-size: 56px; font-weight: 800; color: #16a34a;">+32</div>
+    <div style="color: var(--muted); font-size: 13px;">score delta</div>
+  </div>
+  <div class="hero-meta">
+    <h1>Before → After</h1>
+    <div class="url">https://example-shop.test</div>
+    <div class="hero-stats">
+      <div class="stat"><strong>62 → 94</strong>Score</div>
+      <div class="stat"><strong>C → A</strong>Grade</div>
+      <div class="stat"><strong>14 → 2</strong>Violations</div>
+      <div class="stat"><strong>4</strong>Resolved</div>
+      <div class="stat"><strong>1</strong>New</div>
+    </div>
+  </div>
+</section>
+<section class="section">
+  <h2>Resolved <span class="section-count">4</span></h2>
+  
+<article class="card issue-card">
+  <header class="issue-header">
+    <div class="issue-rank">#2</div>
+    <div class="issue-title">
+      <h3>12 images are missing alternative text</h3>
+      <div class="issue-meta">
+        <span class="badge" style="background:#dc26261a;color:#dc2626;border-color:#dc262640">CRITICAL</span>
+        <span class="badge" style="background:#2563eb1a;color:#2563eb;border-color:#2563eb40">WCAG 1.1.1</span>
+        <span class="meta-pill">12 elements</span>
+        <span class="badge" style="background:#16a34a1a;color:#16a34a;border-color:#16a34a40">Auto-fixable</span>
+      </div>
+    </div>
+  </header>
+  <p class="issue-impact"><strong>Why it matters:</strong> Screen reader users hear nothing or the filename. The content is completely lost for users who can&#39;t see images.</p>
+  <p class="issue-suggestion"><strong>How to fix:</strong> Add an alt attribute to every img. Use descriptive text. For decorative images, use alt=&quot;&quot;.</p>
+  <details class="issue-code">
+    <summary>Example fix</summary>
+    <div class="code-grid">
+      <div><div class="code-label">Before</div><pre>&lt;img src=&quot;hero-banner.jpg&quot;&gt;</pre></div>
+      <div><div class="code-label">After</div><pre>&lt;img src=&quot;hero-banner.jpg&quot; alt=&quot;Two designers reviewing wireframes on a laptop&quot;&gt;</pre></div>
+    </div>
+  </details>
+  <a class="issue-link" href="https://dequeuniversity.com/rules/axe/4.10/image-alt" target="_blank" rel="noopener">Learn more →</a>
+</article>
+<article class="card issue-card">
+  <header class="issue-header">
+    <div class="issue-rank">#3</div>
+    <div class="issue-title">
+      <h3>5 buttons have no accessible name</h3>
+      <div class="issue-meta">
+        <span class="badge" style="background:#dc26261a;color:#dc2626;border-color:#dc262640">CRITICAL</span>
+        <span class="badge" style="background:#2563eb1a;color:#2563eb;border-color:#2563eb40">WCAG 4.1.2</span>
+        <span class="meta-pill">5 elements</span>
+        <span class="badge" style="background:#16a34a1a;color:#16a34a;border-color:#16a34a40">Auto-fixable</span>
+      </div>
+    </div>
+  </header>
+  <p class="issue-impact"><strong>Why it matters:</strong> Screen reader users hear &#39;button&#39; with no indication of what it does. Keyboard and voice control users cannot target by name.</p>
+  <p class="issue-suggestion"><strong>How to fix:</strong> Add aria-label to icon-only buttons. Ensure visible text describes the action.</p>
+  <details class="issue-code">
+    <summary>Example fix</summary>
+    <div class="code-grid">
+      <div><div class="code-label">Before</div><pre>&lt;button&gt;&lt;svg aria-hidden=&quot;true&quot;&gt;…&lt;/svg&gt;&lt;/button&gt;</pre></div>
+      <div><div class="code-label">After</div><pre>&lt;button aria-label=&quot;Add to cart&quot;&gt;&lt;svg aria-hidden=&quot;true&quot;&gt;…&lt;/svg&gt;&lt;/button&gt;</pre></div>
+    </div>
+  </details>
+  <a class="issue-link" href="https://dequeuniversity.com/rules/axe/4.10/button-name" target="_blank" rel="noopener">Learn more →</a>
+</article>
+<article class="card issue-card">
+  <header class="issue-header">
+    <div class="issue-rank">#4</div>
+    <div class="issue-title">
+      <h3>4 form fields are missing a label</h3>
+      <div class="issue-meta">
+        <span class="badge" style="background:#ea580c1a;color:#ea580c;border-color:#ea580c40">SERIOUS</span>
+        <span class="badge" style="background:#2563eb1a;color:#2563eb;border-color:#2563eb40">WCAG 1.3.1</span> <span class="badge" style="background:#2563eb1a;color:#2563eb;border-color:#2563eb40">4.1.2</span>
+        <span class="meta-pill">4 elements</span>
+        
+      </div>
+    </div>
+  </header>
+  <p class="issue-impact"><strong>Why it matters:</strong> Screen reader users cannot identify what information a field expects. Voice control users cannot target by name.</p>
+  <p class="issue-suggestion"><strong>How to fix:</strong> Associate a label element with every input via for/htmlFor. Placeholders are not labels.</p>
+  <details class="issue-code">
+    <summary>Example fix</summary>
+    <div class="code-grid">
+      <div><div class="code-label">Before</div><pre>&lt;input type=&quot;email&quot; placeholder=&quot;Email address&quot;&gt;</pre></div>
+      <div><div class="code-label">After</div><pre>&lt;label for=&quot;email&quot;&gt;Email&lt;/label&gt;&lt;input id=&quot;email&quot; type=&quot;email&quot;&gt;</pre></div>
+    </div>
+  </details>
+  <a class="issue-link" href="https://dequeuniversity.com/rules/axe/4.10/label" target="_blank" rel="noopener">Learn more →</a>
+</article>
+<article class="card issue-card">
+  <header class="issue-header">
+    <div class="issue-rank">#5</div>
+    <div class="issue-title">
+      <h3>Page is missing a language declaration</h3>
+      <div class="issue-meta">
+        <span class="badge" style="background:#ea580c1a;color:#ea580c;border-color:#ea580c40">SERIOUS</span>
+        <span class="badge" style="background:#2563eb1a;color:#2563eb;border-color:#2563eb40">WCAG 3.1.1</span>
+        <span class="meta-pill">1 element</span>
+        <span class="badge" style="background:#16a34a1a;color:#16a34a;border-color:#16a34a40">Auto-fixable</span>
+      </div>
+    </div>
+  </header>
+  <p class="issue-impact"><strong>Why it matters:</strong> Screen readers cannot select the correct voice/pronunciation engine.</p>
+  <p class="issue-suggestion"><strong>How to fix:</strong> Add a lang attribute to the root &lt;html&gt; element.</p>
+  <details class="issue-code">
+    <summary>Example fix</summary>
+    <div class="code-grid">
+      <div><div class="code-label">Before</div><pre>&lt;html&gt;</pre></div>
+      <div><div class="code-label">After</div><pre>&lt;html lang=&quot;en&quot;&gt;</pre></div>
+    </div>
+  </details>
+  <a class="issue-link" href="https://dequeuniversity.com/rules/axe/4.10/html-has-lang" target="_blank" rel="noopener">Learn more →</a>
+</article>
+</section>
+
+<section class="section">
+  <h2>Newly introduced <span class="section-count">1</span></h2>
+  
+<article class="card issue-card">
+  <header class="issue-header">
+    <div class="issue-rank">#2</div>
+    <div class="issue-title">
+      <h3>Page is missing a main landmark</h3>
+      <div class="issue-meta">
+        <span class="badge" style="background:#ca8a041a;color:#ca8a04;border-color:#ca8a0440">MODERATE</span>
+        <span class="badge" style="background:#2563eb1a;color:#2563eb;border-color:#2563eb40">WCAG 1.3.1</span>
+        <span class="meta-pill">1 element</span>
+        
+      </div>
+    </div>
+  </header>
+  <p class="issue-impact"><strong>Why it matters:</strong> Keyboard and screen reader users cannot skip to the main content.</p>
+  <p class="issue-suggestion"><strong>How to fix:</strong> Wrap the primary content in a &lt;main&gt; element.</p>
+  <details class="issue-code">
+    <summary>Example fix</summary>
+    <div class="code-grid">
+      <div><div class="code-label">Before</div><pre>&lt;div class=&quot;content&quot;&gt;…&lt;/div&gt;</pre></div>
+      <div><div class="code-label">After</div><pre>&lt;main&gt;…&lt;/main&gt;</pre></div>
+    </div>
+  </details>
+  <a class="issue-link" href="https://dequeuniversity.com/rules/axe/4.10/landmark-one-main" target="_blank" rel="noopener">Learn more →</a>
+</article>
+</section>
+<section class="section">
+  <h2>Still present <span class="section-count">2</span></h2>
+  
+<article class="card issue-card">
+  <header class="issue-header">
+    <div class="issue-rank">#1</div>
+    <div class="issue-title">
+      <h3>3 elements have insufficient colour contrast</h3>
+      <div class="issue-meta">
+        <span class="badge" style="background:#ea580c1a;color:#ea580c;border-color:#ea580c40">SERIOUS</span>
+        <span class="badge" style="background:#2563eb1a;color:#2563eb;border-color:#2563eb40">WCAG 1.4.3</span>
+        <span class="meta-pill">3 elements</span>
+        
+      </div>
+    </div>
+  </header>
+  <p class="issue-impact"><strong>Why it matters:</strong> Users with low vision cannot read this text.</p>
+  <p class="issue-suggestion"><strong>How to fix:</strong> Darken text or lighten background to reach 4.5:1 ratio.</p>
+  <details class="issue-code">
+    <summary>Example fix</summary>
+    <div class="code-grid">
+      <div><div class="code-label">Before</div><pre>color: #9CA3AF;</pre></div>
+      <div><div class="code-label">After</div><pre>color: #6B7280;</pre></div>
+    </div>
+  </details>
+  <a class="issue-link" href="https://dequeuniversity.com/rules/axe/4.10/color-contrast" target="_blank" rel="noopener">Learn more →</a>
+</article>
+<article class="card issue-card">
+  <header class="issue-header">
+    <div class="issue-rank">#2</div>
+    <div class="issue-title">
+      <h3>Page is missing a main landmark</h3>
+      <div class="issue-meta">
+        <span class="badge" style="background:#ca8a041a;color:#ca8a04;border-color:#ca8a0440">MODERATE</span>
+        <span class="badge" style="background:#2563eb1a;color:#2563eb;border-color:#2563eb40">WCAG 1.3.1</span>
+        <span class="meta-pill">1 element</span>
+        
+      </div>
+    </div>
+  </header>
+  <p class="issue-impact"><strong>Why it matters:</strong> Keyboard and screen reader users cannot skip to the main content.</p>
+  <p class="issue-suggestion"><strong>How to fix:</strong> Wrap the primary content in a &lt;main&gt; element.</p>
+  <details class="issue-code">
+    <summary>Example fix</summary>
+    <div class="code-grid">
+      <div><div class="code-label">Before</div><pre>&lt;div class=&quot;content&quot;&gt;…&lt;/div&gt;</pre></div>
+      <div><div class="code-label">After</div><pre>&lt;main&gt;…&lt;/main&gt;</pre></div>
+    </div>
+  </details>
+  <a class="issue-link" href="https://dequeuniversity.com/rules/axe/4.10/landmark-one-main" target="_blank" rel="noopener">Learn more →</a>
+</article>
+</section>
+
+  <div class="footer"><div>Generated 2026-05-19T14:30:00.000Z · before 2026-05-19T09:00:00.000Z</div><div><span class="badge" style="background:#2563eb1a;color:#2563eb;border-color:#2563eb40">WCAG 2.2</span> <a href="https://github.com/tayyabataimur/loop11y" target="_blank" rel="noopener">loop11y</a></div></div>
+</div>
+</body>
+</html>

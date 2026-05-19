@@ -7,11 +7,13 @@ import type { AuthConfig } from "../core/auth.js";
 import { toMarkdownReport } from "./export/markdown.js";
 import { toJsonReport, type ReportFormat, writeReport } from "./export/json.js";
 import { toSarifReport } from "./export/sarif.js";
+import { toHtmlReport, renderBeforeAfterHtml } from "./export/html.js";
+import type { EvaluateResult } from "../core/types.js";
 import { auditRepo } from "../tools/scan.js";
 import { crawlSite } from "../tools/crawl.js";
 
 function printHelp(): void {
-  process.stdout.write(`Loop11y CLI\n\nUsage:\n  loop11y audit <url> [--json|--markdown|--sarif] [--output <file>] [auth flags]\n  loop11y audit:file <path> [--json|--markdown|--sarif] [--output <file>] [auth flags]\n  loop11y audit:repo <path> [--base-url <url>] [--max-files <n>] [--json|--markdown|--sarif] [--output <file>] [auth flags]\n  loop11y crawl --url <url> [crawl flags]\n  loop11y crawl --sitemap <url> [crawl flags]\n  loop11y crawl --routes <file> [crawl flags]\n  loop11y verify <source-path> --url <url> [--json|--markdown|--sarif] [--output <file>] [auth flags]\n  loop11y --help\n\nCrawl flags:\n  --max-pages <n>\n  --include-pattern <regex>   (repeatable)\n  --exclude-pattern <regex>   (repeatable)\n  --no-auto-sitemap           (disable sitemap.xml / robots.txt auto-detect)\n  --json | --markdown | --sarif\n  --output <file>\n\nAuth flags:\n  --storage-state <file>\n  --basic-auth-user <user> --basic-auth-pass <pass>\n  --header "Name: Value"   (repeatable)\n\nThreshold flags:\n  --fail-on <critical|serious|moderate|minor>\n  --max-violations <n>\n  --baseline <report.json>\n\nOutput formats:\n  --json     JSON (default)\n  --markdown Markdown\n  --sarif    SARIF 2.1.0 (GitHub Code Scanning)\n\nNotes:\n  - No arguments starts MCP server mode\n  - Crawl auto-detects /sitemap.xml, /sitemap_index.xml, and robots.txt Sitemap directive\n`);
+  process.stdout.write(`Loop11y CLI\n\nUsage:\n  loop11y audit <url> [--json|--markdown|--sarif] [--output <file>] [auth flags]\n  loop11y audit:file <path> [--json|--markdown|--sarif] [--output <file>] [auth flags]\n  loop11y audit:repo <path> [--base-url <url>] [--max-files <n>] [--json|--markdown|--sarif] [--output <file>] [auth flags]\n  loop11y crawl --url <url> [crawl flags]\n  loop11y crawl --sitemap <url> [crawl flags]\n  loop11y crawl --routes <file> [crawl flags]\n  loop11y audit <url> --html --output report.html\n  loop11y verify <source-path> --url <url> [--json|--markdown|--sarif|--html] [--output <file>] [auth flags]\n  loop11y diff <before.json> <after.json> --output <report.html>\n  loop11y --help\n\nCrawl flags:\n  --max-pages <n>\n  --include-pattern <regex>   (repeatable)\n  --exclude-pattern <regex>   (repeatable)\n  --no-auto-sitemap           (disable sitemap.xml / robots.txt auto-detect)\n  --json | --markdown | --sarif\n  --output <file>\n\nAuth flags:\n  --storage-state <file>\n  --basic-auth-user <user> --basic-auth-pass <pass>\n  --header "Name: Value"   (repeatable)\n\nThreshold flags:\n  --fail-on <critical|serious|moderate|minor>\n  --max-violations <n>\n  --baseline <report.json>\n\nOutput formats:\n  --json     JSON (default)\n  --markdown Markdown\n  --sarif    SARIF 2.1.0 (GitHub Code Scanning)\n  --html     Single-file visual HTML report\n\nNotes:\n  - No arguments starts MCP server mode\n  - Crawl auto-detects /sitemap.xml, /sitemap_index.xml, and robots.txt Sitemap directive\n`);
 }
 
 function readFlagValue(args: string[], name: string): string | undefined {
@@ -50,9 +52,12 @@ function normalizeExistingPath(pathValue: string): string {
 function detectFormat(args: string[], outputPath?: string): ReportFormat {
   if (hasFlag(args, "--markdown")) return "markdown";
   if (hasFlag(args, "--sarif")) return "sarif";
+  if (hasFlag(args, "--html")) return "html";
   if (hasFlag(args, "--json")) return "json";
-  if (outputPath?.toLowerCase().endsWith(".md")) return "markdown";
-  if (outputPath?.toLowerCase().endsWith(".sarif") || outputPath?.toLowerCase().endsWith(".sarif.json")) return "sarif";
+  const lower = outputPath?.toLowerCase();
+  if (lower?.endsWith(".md")) return "markdown";
+  if (lower?.endsWith(".sarif") || lower?.endsWith(".sarif.json")) return "sarif";
+  if (lower?.endsWith(".html") || lower?.endsWith(".htm")) return "html";
   return "json";
 }
 
@@ -62,6 +67,9 @@ function renderForStdout(result: unknown, format: ReportFormat, structured: bool
   }
   if (format === "sarif") {
     return toSarifReport(result);
+  }
+  if (format === "html") {
+    return toHtmlReport(result);
   }
   if (!structured && summary) {
     return `${summary}\n`;
@@ -77,7 +85,7 @@ function emitResult(result: unknown, format: ReportFormat, structured: boolean, 
   process.stdout.write(renderForStdout(result, format, structured, summary));
 
   if (outputPath) {
-    const label = format === "markdown" ? "Markdown" : format === "sarif" ? "SARIF" : "JSON";
+    const label = format === "markdown" ? "Markdown" : format === "sarif" ? "SARIF" : format === "html" ? "HTML" : "JSON";
     process.stdout.write(`\n${label} report written to ${outputPath}\n`);
   }
 }
@@ -214,7 +222,7 @@ export async function runCli(rawArgs: string[]): Promise<void> {
 
   const outputPath = readFlagValue(args, "--output");
   const format = detectFormat(args, outputPath);
-  const structured = hasFlag(args, "--json") || hasFlag(args, "--markdown") || hasFlag(args, "--sarif");
+  const structured = hasFlag(args, "--json") || hasFlag(args, "--markdown") || hasFlag(args, "--sarif") || hasFlag(args, "--html");
   const auth = parseAuth(args);
   const failOn = readFlagValue(args, "--fail-on");
   const maxViolations = parseIntegerFlag(readFlagValue(args, "--max-violations"), "--max-violations");
@@ -292,6 +300,27 @@ export async function runCli(rawArgs: string[]): Promise<void> {
       const summary = `Crawl audit for ${result.origin}\nPages audited: ${result.pagesAudited}\nPages skipped: ${result.pagesSkipped}\nAverage score: ${result.averageScore}`;
       emitResult(result, format, structured, outputPath, summary);
       applyThresholds({ result, failOn, maxViolations, baselinePath });
+      return;
+    }
+
+    case "diff": {
+      const beforePath = args[1];
+      const afterPath = args[2];
+      if (!beforePath || !afterPath || beforePath.startsWith("--") || afterPath.startsWith("--")) {
+        throw new Error("Usage: loop11y diff <before.json> <after.json> --output <report.html>");
+      }
+      const before = JSON.parse(readFileSync(normalizeExistingPath(beforePath), "utf-8")) as EvaluateResult;
+      const after = JSON.parse(readFileSync(normalizeExistingPath(afterPath), "utf-8")) as EvaluateResult;
+      const html = renderBeforeAfterHtml(before, after);
+      if (outputPath) {
+        const { writeFileSync, mkdirSync } = await import("node:fs");
+        const { dirname } = await import("node:path");
+        mkdirSync(dirname(outputPath), { recursive: true });
+        writeFileSync(outputPath, html, "utf-8");
+        process.stdout.write(`HTML diff report written to ${outputPath}\n`);
+      } else {
+        process.stdout.write(html);
+      }
       return;
     }
 

@@ -2,8 +2,9 @@ import { mkdirSync, writeFileSync } from "node:fs";
 import { dirname } from "node:path";
 import { toMarkdownReport } from "./markdown.js";
 import { toSarifReport } from "./sarif.js";
+import { toHtmlReport } from "./html.js";
 
-export type ReportFormat = "json" | "markdown" | "sarif";
+export type ReportFormat = "json" | "markdown" | "sarif" | "html";
 
 export function toJsonReport(value: unknown): string {
   return `${JSON.stringify(value, null, 2)}\n`;
@@ -20,6 +21,8 @@ export function writeReport(path: string, value: unknown, format: ReportFormat):
     ? toMarkdownReport(value)
     : format === "sarif"
       ? toSarifReport(value)
-      : toJsonReport(value);
+      : format === "html"
+        ? toHtmlReport(value)
+        : toJsonReport(value);
   writeFileSync(path, body, "utf-8");
 }

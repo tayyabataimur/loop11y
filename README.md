@@ -25,6 +25,17 @@
 > npx skills add tayyabataimur/loop11y-skill -g -a claude-code
 > ```
 
+### 📊 One-command visual reports
+
+```bash
+npx -y loop11y audit https://your-site.com --html --output report.html
+npx -y loop11y diff before.json after.json --output diff.html
+```
+
+Single self-contained HTML — score gauge, severity bar, top-issue cards with WCAG badges, auto-fixable callouts, "needs human review" section, before/after diff. No JS runtime, share by email or commit to your repo.
+
+[**View sample report →**](https://htmlpreview.github.io/?https://github.com/tayyabataimur/loop11y/blob/main/examples/sample-report.html) · [**View before/after diff →**](https://htmlpreview.github.io/?https://github.com/tayyabataimur/loop11y/blob/main/examples/sample-diff-report.html)
+
 **Loop11y** is a universal accessibility layer for humans and AI agents.
 
 It helps teams **evaluate**, **explain**, **prioritize**, **remediate**, and eventually **enforce** accessibility across websites and web apps with the lowest possible setup friction.
