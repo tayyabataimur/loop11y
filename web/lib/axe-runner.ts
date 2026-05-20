@@ -63,20 +63,22 @@ function mapNode(node: NodeResult): Violation["nodes"][number] {
 
 async function launchBrowser(): Promise<Browser> {
   if (process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME) {
+    // Sparticuz only extracts AL2023 libs (libnss3.so etc.) when it detects
+    // an AWS Lambda Node 20/22 runtime via AWS_EXECUTION_ENV. Vercel doesn't
+    // set this even though the underlying runtime is Lambda-compatible —
+    // backfill it before importing so module-load triggers lib setup.
+    if (!process.env.AWS_EXECUTION_ENV) {
+      process.env.AWS_EXECUTION_ENV = "AWS_Lambda_nodejs22.x";
+    }
     const sparticuz = (await import("@sparticuz/chromium")).default;
     sparticuz.setHeadlessMode = true;
     sparticuz.setGraphicsMode = false;
     const executablePath = await sparticuz.executablePath();
-    const existing = process.env.LD_LIBRARY_PATH ?? "";
-    const ldPath = ["/tmp/aws/lib", "/tmp/al2023/lib", "/tmp", existing]
-      .filter(Boolean)
-      .join(":");
-    process.env.LD_LIBRARY_PATH = ldPath;
     return playwrightChromium.launch({
       args: sparticuz.args,
       executablePath,
       headless: true,
-      env: { ...process.env, LD_LIBRARY_PATH: ldPath } as Record<string, string>,
+      env: process.env as Record<string, string>,
     });
   }
   return playwrightChromium.launch({ headless: true });
