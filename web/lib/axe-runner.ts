@@ -90,15 +90,21 @@ export async function runAxeAudit(target: string, options?: AxeRunOptions): Prom
     const context = await browser.newContext({
       viewport: DEFAULT_VIEWPORT,
       reducedMotion: "reduce",
+      bypassCSP: true,
     });
+    // Inject axe-core into every new document in main world. addInitScript
+    // runs before any page script and isn't blocked by the target's CSP,
+    // unlike addScriptTag which inserts an inline <script> the page CSP
+    // can reject (causing globalThis.axe to remain undefined).
+    await context.addInitScript({ content: axe.source });
     const page = await context.newPage();
     const response = await page.goto(target, { waitUntil: "networkidle", timeout: 30_000 });
     const contentType = response?.headers()["content-type"];
 
-    await page.addScriptTag({ content: axe.source });
-
     const evalResult = (await page.evaluate(async () => {
-      const a = (globalThis as unknown as { axe: typeof axe }).axe;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const a = (globalThis as any).axe;
+      if (!a) throw new Error("axe-core failed to load in page context");
       const results = await a.run();
       return { results, version: a.version };
     })) as { results: AxeResults; version: string };
