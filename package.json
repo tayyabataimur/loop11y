@@ -1,6 +1,6 @@
 {
   "name": "loop11y",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Universal MCP and CLI tool for evaluating, fixing, and enforcing accessibility across any website or web app",
   "type": "module",
   "main": "dist/index.js",
