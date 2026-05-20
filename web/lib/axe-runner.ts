@@ -67,10 +67,16 @@ async function launchBrowser(): Promise<Browser> {
     sparticuz.setHeadlessMode = true;
     sparticuz.setGraphicsMode = false;
     const executablePath = await sparticuz.executablePath();
+    const existing = process.env.LD_LIBRARY_PATH ?? "";
+    const ldPath = ["/tmp/aws/lib", "/tmp/al2023/lib", "/tmp", existing]
+      .filter(Boolean)
+      .join(":");
+    process.env.LD_LIBRARY_PATH = ldPath;
     return playwrightChromium.launch({
-      args: [...sparticuz.args, "--disable-gpu", "--single-process"],
+      args: sparticuz.args,
       executablePath,
       headless: true,
+      env: { ...process.env, LD_LIBRARY_PATH: ldPath } as Record<string, string>,
     });
   }
   return playwrightChromium.launch({ headless: true });

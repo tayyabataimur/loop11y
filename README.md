@@ -35,7 +35,7 @@ npx -y loop11y audit https://your-site.com --html --output report.html
 > **`audit → share → fix → re-audit`** — repeat until you reach every user.
 
 > [!TIP]
-> **Zero-config path:** point your agent at the [Loop11y Skill](https://www.skills.sh/tayyabataimur/loop11y-skill) (or `npx skills add tayyabataimur/loop11y-skill -g -a claude-code`) and just say *"use the loop11y skill to fix accessibility on my site."* The agent picks the tool, runs the loop, opens the PR.
+> **Zero-config path:** point your agent at the [Loop11y Skill](https://www.skills.sh/tayyabataimur/loop11y-skill) (or `npx skills add tayyabataimur/loop11y-skill -g -a <your-agent>`) and just say *"use the loop11y skill to fix accessibility on my site."* The agent picks the tool, runs the loop, opens the PR.
 
 ## Runs where you work
 
@@ -61,7 +61,7 @@ npx -y loop11y audit https://your-site.com --html --output report.html
 | Surface | Command |
 |---|---|
 | CLI | `npm i -g loop11y` or `npx -y loop11y` |
-| [Agent Skill](https://www.skills.sh/tayyabataimur/loop11y-skill) (Claude Code, Cursor, Cline, Codex, [50+ others](https://skills.sh)) | `npx skills add tayyabataimur/loop11y-skill -g -a claude-code` |
+| [Agent Skill](https://www.skills.sh/tayyabataimur/loop11y-skill) ([50+ agents](https://skills.sh)) | `npx skills add tayyabataimur/loop11y-skill -g -a <agent>` |
 | MCP server (stdio) | add to client config (see below) |
 | MCP server (HTTP) | `LOOP11Y_PORT=3000 npx -y loop11y` |
 | GitHub Action | `uses: tayyabataimur/loop11y/action@v0.1.0` |

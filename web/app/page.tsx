@@ -234,7 +234,7 @@ function InstallPaths() {
       title: "Agent Skill",
       blurb: (<>One-line install for Claude Code, Cursor, Cline, Codex, Aider, and <a href="https://skills.sh" target="_blank" rel="noreferrer">50+ other agents</a>. Guided prompting on top of the MCP server.</>),
       code: (
-        <><span className="prompt">$</span> npx skills add tayyabataimur/loop11y-skill -g -a <span className="arg">claude-code</span></>
+        <><span className="prompt">$</span> npx skills add tayyabataimur/loop11y-skill -g -a <span className="arg">&lt;your-agent&gt;</span></>
       ),
     },
     {
