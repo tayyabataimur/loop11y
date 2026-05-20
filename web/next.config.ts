@@ -5,8 +5,14 @@ const config: NextConfig = {
   outputFileTracingRoot: __dirname,
   serverExternalPackages: ["@sparticuz/chromium", "playwright-core"],
   outputFileTracingIncludes: {
-    "/api/audit": ["./node_modules/@sparticuz/chromium/**"],
-    "/api/crawl": ["./node_modules/@sparticuz/chromium/**"],
+    "/api/audit": [
+      "./node_modules/@sparticuz/chromium/**/*",
+      "./node_modules/@sparticuz/chromium/bin/*",
+    ],
+    "/api/crawl": [
+      "./node_modules/@sparticuz/chromium/**/*",
+      "./node_modules/@sparticuz/chromium/bin/*",
+    ],
   },
 };
 

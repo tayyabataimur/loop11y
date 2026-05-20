@@ -64,9 +64,12 @@ function mapNode(node: NodeResult): Violation["nodes"][number] {
 async function launchBrowser(): Promise<Browser> {
   if (process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME) {
     const sparticuz = (await import("@sparticuz/chromium")).default;
+    sparticuz.setHeadlessMode = true;
+    sparticuz.setGraphicsMode = false;
+    const executablePath = await sparticuz.executablePath();
     return playwrightChromium.launch({
-      args: sparticuz.args,
-      executablePath: await sparticuz.executablePath(),
+      args: [...sparticuz.args, "--disable-gpu", "--single-process"],
+      executablePath,
       headless: true,
     });
   }
