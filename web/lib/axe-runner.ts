@@ -1,6 +1,27 @@
-import axe from "axe-core";
 import type { AxeResults, Result, NodeResult } from "axe-core";
 import { chromium as playwrightChromium, type Browser } from "playwright-core";
+import { readFileSync } from "node:fs";
+import { createRequire } from "node:module";
+
+// Resolve axe-core's bundled IIFE from disk at runtime. Importing
+// `axe.source` directly is fragile under Next.js bundling: webpack may
+// drop the huge `.source` string property when tree-shaking the module
+// (since nothing in this file otherwise references it), leaving us with
+// `undefined` injected into the page. Reading the file directly via
+// createRequire keeps the dependency intact regardless of bundler state.
+let _axeSource: string | null = null;
+function axeSource(): string {
+  if (_axeSource) return _axeSource;
+  const require = createRequire(import.meta.url);
+  let resolved: string;
+  try {
+    resolved = require.resolve("axe-core/axe.min.js");
+  } catch {
+    resolved = require.resolve("axe-core");
+  }
+  _axeSource = readFileSync(resolved, "utf-8");
+  return _axeSource;
+}
 
 export interface Violation {
   id: string;
@@ -96,7 +117,7 @@ export async function runAxeAudit(target: string, options?: AxeRunOptions): Prom
     // runs before any page script and isn't blocked by the target's CSP,
     // unlike addScriptTag which inserts an inline <script> the page CSP
     // can reject (causing globalThis.axe to remain undefined).
-    await context.addInitScript({ content: axe.source });
+    await context.addInitScript({ content: axeSource() });
     const page = await context.newPage();
     const response = await page.goto(target, { waitUntil: "networkidle", timeout: 30_000 });
     const contentType = response?.headers()["content-type"];
