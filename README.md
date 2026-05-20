@@ -23,9 +23,35 @@ npx -y loop11y audit https://your-site.com --html --output report.html
   <img src="docs/hero.png" alt="Loop11y: +25% addressable market, 71% disabled users abandon inaccessible sites, €20k+/breach EAA fines, 96.3% of top 1M homepages have WCAG failures. Audit. Then ship the fix." width="100%" />
 </a>
 
-One paste runs the audit. One MCP call lets your agent open the PR. One re-run verifies the score moved. That's the loop. Each issue is patch-ready for your AI agent — Claude Code / Cursor / Cline / Copilot / Aider / Codex all speak Loop11y via MCP. Same engine powers [the web demo](https://loop11y.tayyaba.dev), the MCP server, and the GitHub Action.
+## The loop
 
-Sample reports: [audit](https://htmlpreview.github.io/?https://github.com/tayyabataimur/loop11y/blob/main/examples/sample-report.html) · [before/after diff](https://htmlpreview.github.io/?https://github.com/tayyabataimur/loop11y/blob/main/examples/sample-diff-report.html).
+```text
+  loop11y audit            →  share with agent       →  agent ships fix
+       ↑                                                       ↓
+       └──────────────  loop11y audit (re-run)  ←──────────────┘
+                              score moved · ship PR
+```
+
+> **`audit → share → fix → re-audit`** — repeat until you reach every user.
+
+## Runs where you work
+
+<table>
+<tr>
+<td><b>🖥 CLI</b><br/><sub><code>npx -y loop11y</code></sub></td>
+<td><b>🤖 Agent Skill</b><br/><sub><a href="https://www.skills.sh/tayyabataimur/loop11y-skill">skills.sh</a></sub></td>
+<td><b>🔌 MCP server</b><br/><sub>stdio + HTTP</sub></td>
+<td><b>🐙 GitHub Action</b><br/><sub>PR gate</sub></td>
+</tr>
+<tr>
+<td><b>🌐 Web demo</b><br/><sub><a href="https://loop11y.tayyaba.dev">loop11y.tayyaba.dev</a></sub></td>
+<td><b>🧠 ChatGPT GPT</b><br/><sub>OpenAPI</sub></td>
+<td><b>📦 Harness SDK</b><br/><sub><code>loop11y/harness-sdk</code></sub></td>
+<td><b>🐳 Docker / Fly</b><br/><sub>self-host</sub></td>
+</tr>
+</table>
+
+**Sample reports** → [audit](https://htmlpreview.github.io/?https://github.com/tayyabataimur/loop11y/blob/main/examples/sample-report.html) · [before/after diff](https://htmlpreview.github.io/?https://github.com/tayyabataimur/loop11y/blob/main/examples/sample-diff-report.html)
 
 ## Install
 
