@@ -34,6 +34,9 @@ npx -y loop11y audit https://your-site.com --html --output report.html
 
 > **`audit → share → fix → re-audit`** — repeat until you reach every user.
 
+> [!TIP]
+> **Zero-config path:** point your agent at the [Loop11y Skill](https://www.skills.sh/tayyabataimur/loop11y-skill) (or `npx skills add tayyabataimur/loop11y-skill -g -a claude-code`) and just say *"use the loop11y skill to fix accessibility on my site."* The agent picks the tool, runs the loop, opens the PR.
+
 ## Runs where you work
 
 <table>
